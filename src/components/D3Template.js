@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react'
 
-class Histogram extends React.Component {
+class Template extends React.Component {
   // constructor (props) {
   //   super(props)
   // }
@@ -29,10 +29,10 @@ class Histogram extends React.Component {
   }
 }
 
-Histogram.defaultProps = {
+Template.defaultProps = {
 }
 
-Histogram.propTypes = {
+Template.propTypes = {
 }
 
-export default Histogram
+export default Template

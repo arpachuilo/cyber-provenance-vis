@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react'
-import * as d3 from 'd3' // Reduce what's needed here
+import * as d3 from 'd3' // TODO: Reduce what's needed here
 
 class Histogram extends React.Component {
   constructor (props) {
@@ -11,44 +11,53 @@ class Histogram extends React.Component {
   }
 
   createChart () {
+    // Get real chart width/height
+    this.chartWidth = this.props.width - this.props.margin.left - this.props.margin.right
+    this.chartHeight = this.props.height - this.props.margin.top - this.props.margin.bottom
+
     let root = d3.select(this.refs.root)
     let svg = root.append('svg')
-      .attr('width', this.props.width)
-      .attr('height', this.props.height)
+      .attr('width', this.props.width + this.props.margin.left + this.props.margin.right)
+      .attr('height', this.props.height + this.props.margin.top + this.props.margin.bottom)
     this.chart = svg.append('g')
       .attr('transform', 'translate(' + this.props.margin.left + ',' + this.props.margin.top + ')')
+    this.xAxis = this.chart.append('g')
+      .attr('class', 'axis x-axis')
+      .attr('transform', 'translate(0,' + this.chartHeight + ')')
+    this.yAxis = this.chart.append('g')
+      .attr('class', 'axis y-axis')
   }
 
   updateChart () {
-    console.log(this.props.data)
     let xScale = d3.scaleTime()
       .domain(d3.extent(this.props.data, (d) => +(new Date(d.AccessTime))))
-      .range([0, this.props.width])
+      .range([0, this.chartWidth])
 
     let yScale = d3.scaleLinear()
-      .domain([0, d3.max(this.props.data, (d) => parseInt(d.ReqSize))])
-      .range([this.props.height, 0])
+      .range([this.chartHeight, 0])
 
-    let histogram = d3.histogram()
+    let bins = d3.histogram()
       .value((d) => +(new Date(d.AccessTime)))
       .domain(xScale.domain())
-      .thresholds(xScale.ticks(20))
+      .thresholds(xScale.ticks(100))(this.props.data)
 
-    console.log(xScale.domain(), yScale.domain(), histogram(this.props.data))
-    // let xScale = d3.scaleOrdinalBand()
-    //   .range([0, this.props.width])
-    //
-    // let histogram = d3.histogram()
-    //   .domain(this.xScale())
-    //   (this.props.data)
-    //
-    // let yScale = d3.scaleLinear()
-    //   .range([this.props.height, 0])
-    //
-    //
-    // // let bar = this.chart.selectAll('.bar')
-    // this.chart.selectAll('.bar')
-    //   .data(this.histogramData)
+    yScale
+      .domain([0, d3.max(bins, (d) => d.length)])
+
+    let barContainer = this.chart.append('g')
+        .attr('class', 'bars')
+
+    barContainer.selectAll('.bar')
+        .data(bins)
+      .enter().append('rect')
+        .attr('class', 'bar')
+        .attr('x', (d) => xScale(d.x0))
+        .attr('y', (d) => yScale(d.length))
+        .attr('width', (d) => xScale(d.x1) - xScale(d.x0))
+        .attr('height', (d) => this.chartHeight - yScale(d.length))
+
+    this.xAxis.call(d3.axisBottom(xScale))
+    this.yAxis.call(d3.axisLeft(yScale))
   }
 
   removeChart () {
@@ -80,10 +89,11 @@ Histogram.defaultProps = {
   data: [],
   margin: {
     top: 15,
-    left: 20,
-    bottom: 0,
+    left: 45,
+    bottom: 15,
     right: 0
   },
+  numBins: 10,
   width: 640,
   height: 360,
   xAccessor: 'key',
@@ -95,6 +105,7 @@ Histogram.propTypes = {
   margin: PropTypes.object,
   width: PropTypes.number,
   height: PropTypes.number,
+  numBins: PropTypes.number,
   xAccessor: PropTypes.string,
   yAccessor: PropTypes.string
 }

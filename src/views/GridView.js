@@ -2,6 +2,7 @@ import React from 'react'
 
 import employeeData from '../data/IPLog3.5.csv'
 
+import EmployeeTable from '../components/employeeTable'
 import Histogram from '../components/histogram'
 
 export class GridView extends React.Component {
@@ -16,10 +17,12 @@ export class GridView extends React.Component {
   render () {
     return (
       <div>
-        <span>GridView</span>
-        <ul>
+        <div>
           <Histogram data={this.state.data} />
-        </ul>
+        </div>
+        <div>
+          <EmployeeTable data={this.state.data} />
+        </div>
       </div>
     )
   }
