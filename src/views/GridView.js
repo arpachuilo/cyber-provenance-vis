@@ -1,6 +1,8 @@
 import React from 'react'
 
-import employeeData from '../data/IPLog3.5.csv'
+import ipData from '../data/IPLog3.5.csv'
+import proxData from '../data/proxLog.csv'
+import employeeData from '../data/employeeData.csv'
 
 import EmployeeTable from '../components/employeeTable'
 import Histogram from '../components/histogram'
@@ -10,7 +12,9 @@ export class GridView extends React.Component {
     super(props)
 
     this.state = {
-      data: employeeData
+      ipData: ipData,
+      proxData: proxData,
+      employeeData: employeeData
     }
   }
 
@@ -18,10 +22,10 @@ export class GridView extends React.Component {
     return (
       <div>
         <div>
-          <Histogram data={this.state.data} />
+          <Histogram data={this.state.ipData} autoWidth />
         </div>
         <div>
-          <EmployeeTable data={this.state.data} />
+          <EmployeeTable data={this.state.employeeData} className='employeeTable' />
         </div>
       </div>
     )

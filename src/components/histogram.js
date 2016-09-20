@@ -11,14 +11,21 @@ class Histogram extends React.Component {
   }
 
   createChart () {
-    // Get real chart width/height
-    this.chartWidth = this.props.width - this.props.margin.left - this.props.margin.right
-    this.chartHeight = this.props.height - this.props.margin.top - this.props.margin.bottom
-
     let root = d3.select(this.refs.root)
+
+    // Get real chart width/height
+    let width = this.props.width
+    let height = this.props.height
+    if (this.props.autoWidth) {
+      width = root.node().offsetWidth
+    }
+
+    this.chartWidth = width - this.props.margin.left - this.props.margin.right
+    this.chartHeight = height - this.props.margin.top - this.props.margin.bottom
+
     let svg = root.append('svg')
-      .attr('width', this.props.width + this.props.margin.left + this.props.margin.right)
-      .attr('height', this.props.height + this.props.margin.top + this.props.margin.bottom)
+      .attr('width', width + this.props.margin.left + this.props.margin.right)
+      .attr('height', height + this.props.margin.top + this.props.margin.bottom)
     this.chart = svg.append('g')
       .attr('transform', 'translate(' + this.props.margin.left + ',' + this.props.margin.top + ')')
     this.xAxis = this.chart.append('g')
@@ -61,7 +68,8 @@ class Histogram extends React.Component {
   }
 
   removeChart () {
-
+    let root = d3.select(this.refs.root)
+    root.selectAll('*').remove()
   }
 
   componentDidMount () {
@@ -94,6 +102,7 @@ Histogram.defaultProps = {
     right: 0
   },
   numBins: 10,
+  autoWidth: false,
   width: 640,
   height: 360,
   xAccessor: 'key',
@@ -103,6 +112,7 @@ Histogram.defaultProps = {
 Histogram.propTypes = {
   data: PropTypes.array,
   margin: PropTypes.object,
+  autoWidth: PropTypes.bool,
   width: PropTypes.number,
   height: PropTypes.number,
   numBins: PropTypes.number,
