@@ -1,8 +1,8 @@
 import { combineReducers } from 'redux'
 import { routerStateReducer } from 'redux-router'
-import listReducer from './listReducer'
+import vastReducer from './vastReducer'
 
 export default combineReducers({
-  list: listReducer,
+  vast: vastReducer,
   router: routerStateReducer
 })

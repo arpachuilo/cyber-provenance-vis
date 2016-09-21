@@ -39,6 +39,7 @@ export class EmployeeTable extends React.Component {
     return (
       <div className={this.props.className}>
         <Table
+          onRowClick={this.props.onRowClick}
           data={this.props.data}>
           <Column
             columnKey='EmployeeID'
@@ -71,11 +72,13 @@ export class EmployeeTable extends React.Component {
 }
 
 EmployeeTable.defaultProps = {
+  onRowClick: () => {},
   className: '',
   data: []
 }
 
 EmployeeTable.propTypes = {
+  onRowClick: PropTypes.func,
   className: PropTypes.string,
   data: PropTypes.array
 }

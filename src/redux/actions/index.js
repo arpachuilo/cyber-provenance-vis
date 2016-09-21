@@ -1,22 +1,30 @@
-export const ADD_ITEM = 'ADD_ITEM'
-export const addItem = (item) => {
+export const TOGGLE_FILTER = 'TOGGLE_FILTER'
+export const toggleFilter = (filterObject) => {
   return {
-    type: ADD_ITEM,
-    item: item
+    type: TOGGLE_FILTER,
+    filterObject: filterObject
   }
 }
 
-export const REMOVE_ITEM = 'REMOVE_ITEM'
-export const removeItem = (item) => {
+export const REMOVE_FILTER = 'REMOVE_FILTER'
+export const removeFilter = (filterObject) => {
   return {
-    type: REMOVE_ITEM,
-    item: item
+    type: REMOVE_FILTER,
+    filterObject: filterObject
   }
 }
 
-export const CLEAR_ITEMS = 'CLEAR_ITEMS'
-export const clearItems = () => {
+export const ADD_FILTER = 'ADD_FILTER'
+export const addFilter = (filterObject) => {
   return {
-    type: CLEAR_ITEMS
+    type: ADD_FILTER,
+    filterObject: filterObject
+  }
+}
+
+export const CLEAR_FILTER = 'CLEAR_FILTER'
+export const clearFilters = () => {
+  return {
+    type: CLEAR_FILTER
   }
 }
