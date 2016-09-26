@@ -9,7 +9,7 @@ nav ul
   margin 0
   padding 0
   overflow hidden
-  background-color #333
+  background-color steelblue
 
 nav li
   float left
@@ -17,16 +17,21 @@ nav li
 
 nav li a
   display block
-  color white
+  color whitesmoke
   text-align center
   padding 14px 16px
   text-decoration none
 
 nav li a:hover
-  background-color #111
+  border-bottom 5px solid whitesmoke
+  color whitesmoke
 
-nav li .active
-  background-color #4CAF50
+nav li a.active
+  border-bottom 5px solid whitesmoke
+
+// Override skeleton container size
+.container
+  max-width 80%
 
 // Employee table style
 .employeeTable
@@ -36,3 +41,17 @@ nav li .active
 
 .employeeTable table
   width 100%
+
+// IP table style
+.ipTable table
+  width 100%
+
+.ipTable .prevBtn
+  float left
+
+.ipTable .nextBtn
+  float right
+
+.ipTable .info
+  display inline-block
+  text-align center

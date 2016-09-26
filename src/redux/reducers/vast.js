@@ -1,7 +1,9 @@
 import mergewith from 'lodash.mergewith'
 import remove from 'lodash.remove'
-import isArray from 'lodash.isArray'
+import isArray from 'lodash.isarray'
 import isempty from 'lodash.isempty'
+import keys from 'lodash.keys'
+import values from 'lodash.values'
 import has from 'lodash.has'
 
 // private helper function for lodash.mergewith
@@ -21,14 +23,14 @@ const applyFilters = (data, filterObject) => {
   let filteredData = []
 
   // Get relevant keys from filterObject for dataset
-  let keys = Object.keys(data[0])
+  let keyArr = keys(data[0])
   for (let i = 0; i < data.length; i++) {
     let datum = data[i]
     let keep = true
-    for (let j = 0; j < keys.length; j++) {
-      if (has(filterObject, keys[j])) {
-        let value = datum[keys[j]]
-        if (filterObject[keys[j]].indexOf(value) < 0) {
+    for (let j = 0; j < keyArr.length; j++) {
+      if (has(filterObject, keyArr[j])) {
+        let value = datum[keyArr[j]]
+        if (filterObject[keyArr[j]].indexOf(value) < 0) {
           keep = false
         }
       }
@@ -43,8 +45,8 @@ const applyFilters = (data, filterObject) => {
 
 // NOTE: Only uses first key with it's first value in its array
 const toggleFilter = (state, filterObject) => {
-  let key = Object.keys(filterObject)[0]
-  let value = Object.values(filterObject)[0][0]
+  let key = keys(filterObject)[0]
+  let value = values(filterObject)[0][0]
   // Has associated value, therefore more checks required
   if (has(state.filterObject, key)) {
     // Has key with associated value in array
@@ -59,7 +61,7 @@ const toggleFilter = (state, filterObject) => {
 }
 
 const removeFilter = (state, filterObject) => {
-  let key = Object.keys(filterObject)[0]
+  let key = keys(filterObject)[0]
 
   let newAttributes = remove(state.filterObject[key], (a) => {
     return filterObject[key].indexOf(a)

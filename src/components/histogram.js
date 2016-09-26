@@ -99,7 +99,7 @@ Histogram.defaultProps = {
     top: 15,
     left: 45,
     bottom: 15,
-    right: 0
+    right: 45
   },
   numBins: 10,
   autoWidth: false,
