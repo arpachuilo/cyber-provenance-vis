@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react'
 import { connect } from 'react-redux'
 
-import { toggleFilter } from '../redux/actions'
+import { toggleFilter, updateFilter } from '../redux/actions'
 import EmployeeTable from '../components/employeeTable'
 import IpTable from '../components/ipTable'
 import Histogram from '../components/histogram'
@@ -12,6 +12,7 @@ class GridView extends React.Component {
     super(props)
 
     this.onRowClick = this.onRowClick.bind(this)
+    this.onHistogramBrushEnd = this.onHistogramBrushEnd.bind(this)
   }
 
   onRowClick (d, i) {
@@ -21,18 +22,30 @@ class GridView extends React.Component {
     })
   }
 
+  onHistogramBrushEnd (range) {
+    let accessTimeFilter = {
+      'AccessTime': range
+    }
+    accessTimeFilter.AccessTime.isRange = true
+    this.props.updateFilter(accessTimeFilter)
+  }
+
   render () {
     return (
       <div>
         <div>
-          <Histogram data={this.props.ipData} autoWidth />
+          <Histogram data={this.props.ipDataFiltered}
+            autoWidth />
+          <Histogram data={this.props.ipData}
+            autoWidth height={150} brushable
+            onBrushEnd={this.onHistogramBrushEnd} />
         </div>
         <div className='row'>
           <EmployeeTable
             onRowClick={this.onRowClick}
             data={this.props.employeeData} className='four columns employeeTable' />
           <IpTable
-            data={this.props.ipData} className='eight columns ipTable' />
+            data={this.props.ipDataFiltered} className='eight columns ipTable' />
         </div>
         <div>
           <EmployeeTable data={this.props.employeeDataFiltered} className='employeeTable' />
@@ -47,6 +60,7 @@ class GridView extends React.Component {
 
 GridView.defaultProps = {
   toggleFilter: () => {},
+  updateFilter: () => {},
   ipData: [],
   proxData: [],
   employeeData: [],
@@ -57,6 +71,7 @@ GridView.defaultProps = {
 
 GridView.propTypes = {
   toggleFilter: PropTypes.func,
+  updateFilter: PropTypes.func,
   ipData: PropTypes.array,
   proxData: PropTypes.array,
   employeeData: PropTypes.array,
@@ -77,7 +92,8 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = {
-  toggleFilter
+  toggleFilter,
+  updateFilter
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(GridView)

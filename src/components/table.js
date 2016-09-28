@@ -108,7 +108,9 @@ class Table extends React.Component {
             {children.map((e, i) => {
               return (
                 <Column key={i} Component='th' columnKey={e.props.columnKey}>
-                  {e.props.header}
+                  {cloneElement(e.props.header, {
+                    key: e.props.columnKey
+                  })}
                 </Column>
               )
             })}

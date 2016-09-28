@@ -22,6 +22,14 @@ export const addFilter = (filterObject) => {
   }
 }
 
+export const UPDATE_FILTER = 'UPDATE_FILTER'
+export const updateFilter = (filterObject) => {
+  return {
+    type: UPDATE_FILTER,
+    filterObject: filterObject
+  }
+}
+
 export const CLEAR_FILTER = 'CLEAR_FILTER'
 export const clearFilters = () => {
   return {

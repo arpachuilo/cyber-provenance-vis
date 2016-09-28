@@ -8,6 +8,10 @@ class Histogram extends React.Component {
     this.createChart = this.createChart.bind(this)
     this.updateChart = this.updateChart.bind(this)
     this.removeChart = this.removeChart.bind(this)
+
+    this.onBrushStart = this.onBrushStart.bind(this)
+    this.onBrushDrag = this.onBrushDrag.bind(this)
+    this.onBrushEnd = this.onBrushEnd.bind(this)
   }
 
   createChart () {
@@ -28,43 +32,76 @@ class Histogram extends React.Component {
       .attr('height', height + this.props.margin.top + this.props.margin.bottom)
     this.chart = svg.append('g')
       .attr('transform', 'translate(' + this.props.margin.left + ',' + this.props.margin.top + ')')
+    this.barContainer = this.chart.append('g')
+      .attr('class', 'bars')
     this.xAxis = this.chart.append('g')
       .attr('class', 'axis x-axis')
       .attr('transform', 'translate(0,' + this.chartHeight + ')')
     this.yAxis = this.chart.append('g')
       .attr('class', 'axis y-axis')
+    if (this.props.brushable) {
+      this.brush = this.chart.append('g')
+        .attr('class', 'brush')
+    }
   }
 
-  updateChart () {
-    let xScale = d3.scaleTime()
-      .domain(d3.extent(this.props.data, (d) => +(new Date(d.AccessTime))))
+  updateChart (props, state) {
+    this.xScale = d3.scaleTime()
+      .domain(d3.extent(props.data, (d) => +(new Date(d.AccessTime))))
       .range([0, this.chartWidth])
 
-    let yScale = d3.scaleLinear()
+    this.yScale = d3.scaleLinear()
       .range([this.chartHeight, 0])
 
     let bins = d3.histogram()
       .value((d) => +(new Date(d.AccessTime)))
-      .domain(xScale.domain())
-      .thresholds(xScale.ticks(100))(this.props.data)
+      .domain(this.xScale.domain())
+      .thresholds(this.xScale.ticks(100))(props.data)
 
-    yScale
+    this.yScale
       .domain([0, d3.max(bins, (d) => d.length)])
 
-    let barContainer = this.chart.append('g')
-        .attr('class', 'bars')
-
-    barContainer.selectAll('.bar')
+    let bars = this.barContainer.selectAll('.bar')
         .data(bins)
-      .enter().append('rect')
-        .attr('class', 'bar')
-        .attr('x', (d) => xScale(d.x0))
-        .attr('y', (d) => yScale(d.length))
-        .attr('width', (d) => xScale(d.x1) - xScale(d.x0))
-        .attr('height', (d) => this.chartHeight - yScale(d.length))
 
-    this.xAxis.call(d3.axisBottom(xScale))
-    this.yAxis.call(d3.axisLeft(yScale))
+    bars.exit().remove()
+
+    bars.enter()
+      .append('rect')
+        .attr('class', 'bar')
+        .attr('x', (d) => this.xScale(d.x0))
+        .attr('y', (d) => this.yScale(d.length))
+        .attr('width', (d) => this.xScale(d.x1) - this.xScale(d.x0))
+        .attr('height', (d) => this.chartHeight - this.yScale(d.length))
+      .merge(bars).transition().duration(400).ease(d3.easeLinear)
+        .attr('x', (d) => this.xScale(d.x0))
+        .attr('y', (d) => this.yScale(d.length))
+        .attr('width', (d) => this.xScale(d.x1) - this.xScale(d.x0))
+        .attr('height', (d) => this.chartHeight - this.yScale(d.length))
+
+    this.xAxis.call(d3.axisBottom(this.xScale))
+    this.yAxis.call(d3.axisLeft(this.yScale))
+
+    if (props.brushable) {
+      this.brush
+        .call(d3.brushX()
+          .extent([[0, 0], [this.chartWidth, this.chartHeight]])
+          .on('start', this.onBrushStart)
+          .on('brush', this.onBrushDrag)
+          .on('end', this.onBrushEnd))
+    }
+  }
+
+  onBrushStart () {
+    this.props.onBrushStart(d3.event.selection.map(this.xScale.invert))
+  }
+
+  onBrushDrag () {
+    this.props.onBrushDrag(d3.event.selection.map(this.xScale.invert))
+  }
+
+  onBrushEnd () {
+    this.props.onBrushEnd(d3.event.selection.map(this.xScale.invert))
   }
 
   removeChart () {
@@ -74,15 +111,15 @@ class Histogram extends React.Component {
 
   componentDidMount () {
     this.createChart()
-    this.updateChart()
+    this.updateChart(this.props, this.state)
   }
 
   componentWillUnmount () {
     this.removeChart()
   }
 
-  shouldComponentUpdate () {
-    this.updateChart()
+  shouldComponentUpdate (nextProps, nextState) {
+    this.updateChart(nextProps, nextState)
     return false
   }
 
@@ -102,9 +139,13 @@ Histogram.defaultProps = {
     right: 45
   },
   numBins: 10,
+  brushable: false,
   autoWidth: false,
   width: 640,
   height: 360,
+  onBrushStart: () => {},
+  onBrushDrag: () => {},
+  onBrushEnd: () => {},
   xAccessor: 'key',
   yAccessor: 'value'
 }
@@ -112,10 +153,14 @@ Histogram.defaultProps = {
 Histogram.propTypes = {
   data: PropTypes.array,
   margin: PropTypes.object,
+  brushable: PropTypes.bool,
   autoWidth: PropTypes.bool,
   width: PropTypes.number,
   height: PropTypes.number,
   numBins: PropTypes.number,
+  onBrushStart: PropTypes.func,
+  onBrushDrag: PropTypes.func,
+  onBrushEnd: PropTypes.func,
   xAccessor: PropTypes.string,
   yAccessor: PropTypes.string
 }

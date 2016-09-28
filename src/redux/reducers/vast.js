@@ -29,9 +29,23 @@ const applyFilters = (data, filterObject) => {
     let keep = true
     for (let j = 0; j < keyArr.length; j++) {
       if (has(filterObject, keyArr[j])) {
-        let value = datum[keyArr[j]]
-        if (filterObject[keyArr[j]].indexOf(value) < 0) {
-          keep = false
+        if (filterObject[keyArr[j]].isRange) {
+          let value = datum[keyArr[j]]
+          let bounds = filterObject[keyArr[j]]
+          // Check if its a date
+          if (!Number.isNaN(Date.parse(value))) {
+            value = new Date(value)
+            bounds[0] = new Date(bounds[0])
+            bounds[1] = new Date(bounds[1])
+          }
+          if (!(bounds[0] < value && value < bounds[1])) {
+            keep = false
+          }
+        } else {
+          let value = datum[keyArr[j]]
+          if (filterObject[keyArr[j]].indexOf(value) < 0) {
+            keep = false
+          }
         }
       }
     }
@@ -48,9 +62,16 @@ const toggleFilter = (state, filterObject) => {
   let key = keys(filterObject)[0]
   let value = values(filterObject)[0][0]
   // Has associated value, therefore more checks required
-  if (has(state.filterObject, key)) {
+  if (has(state.filters, key)) {
+    // Check if this is a range based filter
+    if (has(filterObject[key], 'isRange')) {
+      if (filterObject[key]) {
+        return addFilter(state, filterObject)
+      }
+    }
+
     // Has key with associated value in array
-    if (state.filterObject[key].indexOf(value) > -1) {
+    if (state.filters[key].indexOf(value) > -1) {
       return removeFilter(state, filterObject)
     } else { // Has key but lacks associated value
       return addFilter(state, filterObject)
@@ -63,29 +84,49 @@ const toggleFilter = (state, filterObject) => {
 const removeFilter = (state, filterObject) => {
   let key = keys(filterObject)[0]
 
-  let newAttributes = remove(state.filterObject[key], (a) => {
+  let newAttributes = remove(state.filters[key], (a) => {
     return filterObject[key].indexOf(a)
   })
 
   if (newAttributes.length > 0) {
-    state.filterObject[key] = newAttributes
+    state.filters[key] = newAttributes
   } else {
-    delete state.filterObject[key]
+    delete state.filters[key]
   }
 
   return {
     ipData: state.ipData,
     proxData: state.proxData,
     employeeData: state.employeeData,
-    ipDataFiltered: applyFilters(state.ipData, state.filterObject),
-    proxDataFiltered: applyFilters(state.proxData, state.filterObject),
-    employeeDataFiltered: applyFilters(state.employeeData, state.filterObject),
-    filterObject: state.filterObject
+    ipDataFiltered: applyFilters(state.ipData, state.filters),
+    proxDataFiltered: applyFilters(state.proxData, state.filters),
+    employeeDataFiltered: applyFilters(state.employeeData, state.filters),
+    filters: state.filters
   }
 }
 
 const addFilter = (state, filterObject) => {
-  let newFilterObject = mergewith(state.filterObject, filterObject, customizer)
+  let newFilterObject = mergewith(state.filters, filterObject, customizer)
+  return {
+    ipData: state.ipData,
+    proxData: state.proxData,
+    employeeData: state.employeeData,
+    ipDataFiltered: applyFilters(state.ipData, newFilterObject),
+    proxDataFiltered: applyFilters(state.proxData, newFilterObject),
+    employeeDataFiltered: applyFilters(state.employeeData, newFilterObject),
+    filters: newFilterObject
+  }
+}
+
+// NOTE: Overrides current filter values
+//  creates filter if it doesn't exist
+const updateFilter = (state, filterObject) => {
+  let key = keys(filterObject)[0]
+  let value = values(filterObject)[0]
+
+  let newFilterObject = {}
+  newFilterObject = state.filters
+  newFilterObject[key] = value
 
   return {
     ipData: state.ipData,
@@ -94,7 +135,7 @@ const addFilter = (state, filterObject) => {
     ipDataFiltered: applyFilters(state.ipData, newFilterObject),
     proxDataFiltered: applyFilters(state.proxData, newFilterObject),
     employeeDataFiltered: applyFilters(state.employeeData, newFilterObject),
-    filterObject: newFilterObject
+    filters: newFilterObject
   }
 }
 
@@ -110,4 +151,4 @@ const clearFilters = (state) => {
   }
 }
 
-export { toggleFilter, addFilter, removeFilter, clearFilters }
+export { toggleFilter, addFilter, removeFilter, updateFilter, clearFilters }

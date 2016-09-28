@@ -109,21 +109,19 @@ class SimpleNetworkGraph extends React.Component {
         this.links.push({
           'source': datum.SourceIP,
           'target': datum.DestIP,
-          'ReqSize': datum.ReqSize,
-          'RespSize': datum.RespSize
+          'ReqSize': +datum.ReqSize,
+          'RespSize': +datum.RespSize
         })
       } else {
         for (let j = 0; j < this.links.length; j++) {
           if (this.links[j].source === datum.SourceIP && this.links[j].target === datum.DestIP) {
-            this.links[j].ReqSize += datum.ReqSize
-            this.links[j].RespSize += datum.RespSize
+            this.links[j].ReqSize += (+datum.ReqSize)
+            this.links[j].RespSize += (+datum.RespSize)
             break
           }
         }
       }
     }
-
-    console.log(this.nodes, this.links)
   }
 
   removeChart () {
@@ -163,8 +161,8 @@ SimpleNetworkGraph.defaultProps = {
   autoWidth: false,
   width: 640,
   height: 640,
-  xAccessor: 'key',
-  yAccessor: 'value'
+  keyAccessor: 'key',
+  valueAccessor: 'ReqSize'
 }
 
 SimpleNetworkGraph.propTypes = {
@@ -174,8 +172,8 @@ SimpleNetworkGraph.propTypes = {
   width: PropTypes.number,
   height: PropTypes.number,
   numBins: PropTypes.number,
-  xAccessor: PropTypes.string,
-  yAccessor: PropTypes.string
+  keyAccessor: PropTypes.string,
+  valueAccessor: PropTypes.string
 }
 
 export default SimpleNetworkGraph

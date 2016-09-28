@@ -1,17 +1,36 @@
 import React, { PropTypes } from 'react'
+import cloneDeep from 'lodash.clonedeep'
+import sortBy from 'lodash.sortby'
 
 import { Table, Column, Cell } from './table'
 
 class HeaderCell extends React.Component {
+  constructor (props) {
+    super(props)
+
+    this.onClick = this.onClick.bind(this)
+  }
+  onClick () {
+    this.props.onClick(this.props.columnKey)
+  }
   render () {
+    let { sortBy, sortOrder, columnKey } = this.props
+    let symbol = ''
+    if (sortBy === columnKey) {
+      symbol = sortOrder === 'asc' ? '\u2191' : '\u2193'
+    }
     return (
       <Cell>
-        {this.props.children}
+        <a onClick={this.onClick}>{this.props.children + ' ' + symbol}</a>
       </Cell>
     )
   }
 }
 HeaderCell.propTypes = {
+  onClick: PropTypes.func,
+  sortBy: PropTypes.string,
+  sortOrder: PropTypes.string,
+  columnKey: PropTypes.string,
   children: PropTypes.string
 }
 
@@ -40,11 +59,29 @@ export class ipTable extends React.Component {
 
     this.state = {
       page: 0,
-      pageSize: 20
+      pageSize: 20,
+      sortBy: 'AccessTime',
+      sortOrder: 'asc'
     }
 
     this.prevPage = this.prevPage.bind(this)
     this.nextPage = this.nextPage.bind(this)
+
+    this.updateSort = this.updateSort.bind(this)
+  }
+
+  updateSort (sortKey) {
+    // If currently selected, flip sortOrder
+    if (sortKey === this.state.sortBy) {
+      this.setState({
+        sortOrder: this.state.sortOrder === 'asc' ? 'desc' : 'asc'
+      })
+    } else {
+      this.setState({
+        sortBy: sortKey,
+        sortOrder: 'asc'
+      })
+    }
   }
 
   prevPage () {
@@ -65,17 +102,24 @@ export class ipTable extends React.Component {
   }
 
   render () {
+    // Sort data
+    // SWITCH THIS UP TO SORT NUMBERS AND IPS AND DATES
+    let sortedData = sortBy(cloneDeep(this.props.data), [this.state.sortBy])
+
+    // Get page of data
     let start = this.state.page * this.state.pageSize
-    let pagedSubset = this.props.data.slice(start, start + this.state.pageSize)
+    let dataSubset = sortedData.slice(start, start + this.state.pageSize)
     return (
       <div className={this.props.className}>
         <Table
           onRowClick={this.props.onRowClick}
-          data={pagedSubset}>
+          data={dataSubset}>
           <Column
             columnKey='AccessTime'
             header={
-              <HeaderCell>
+              <HeaderCell onClick={this.updateSort}
+                sortBy={this.state.sortBy}
+                sortOrder={this.state.sortOrder}>
                 Access Time
               </HeaderCell>}>
             <TextCell />
@@ -83,7 +127,9 @@ export class ipTable extends React.Component {
           <Column
             columnKey='SourceIP'
             header={
-              <HeaderCell>
+              <HeaderCell onClick={this.updateSort}
+                sortBy={this.state.sortBy}
+                sortOrder={this.state.sortOrder}>
                 Source IP
               </HeaderCell>}>
             <TextCell />
@@ -91,7 +137,9 @@ export class ipTable extends React.Component {
           <Column
             columnKey='DestIP'
             header={
-              <HeaderCell>
+              <HeaderCell onClick={this.updateSort}
+                sortBy={this.state.sortBy}
+                sortOrder={this.state.sortOrder}>
                 Destination IP
               </HeaderCell>}>
             <TextCell />
@@ -99,7 +147,9 @@ export class ipTable extends React.Component {
           <Column
             columnKey='Socket'
             header={
-              <HeaderCell>
+              <HeaderCell onClick={this.updateSort}
+                sortBy={this.state.sortBy}
+                sortOrder={this.state.sortOrder}>
                 Socket
               </HeaderCell>}>
             <TextCell />
@@ -107,7 +157,9 @@ export class ipTable extends React.Component {
           <Column
             columnKey='ReqSize'
             header={
-              <HeaderCell>
+              <HeaderCell onClick={this.updateSort}
+                sortBy={this.state.sortBy}
+                sortOrder={this.state.sortOrder}>
                 Request Size
               </HeaderCell>}>
             <TextCell />
@@ -115,7 +167,9 @@ export class ipTable extends React.Component {
           <Column
             columnKey='RespSize'
             header={
-              <HeaderCell>
+              <HeaderCell onClick={this.updateSort}
+                sortBy={this.state.sortBy}
+                sortOrder={this.state.sortOrder}>
                 Response Size
               </HeaderCell>}>
             <TextCell />
