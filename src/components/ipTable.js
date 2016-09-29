@@ -1,8 +1,7 @@
 import React, { PropTypes } from 'react'
-import cloneDeep from 'lodash.clonedeep'
-import sortBy from 'lodash.sortby'
 
 import { Table, Column, Cell } from './table'
+import { ipToInt } from '../util'
 
 class HeaderCell extends React.Component {
   constructor (props) {
@@ -60,7 +59,7 @@ export class ipTable extends React.Component {
     this.state = {
       page: 0,
       pageSize: 20,
-      sortBy: 'AccessTime',
+      sortBy: 'ReqSize',
       sortOrder: 'asc'
     }
 
@@ -103,8 +102,18 @@ export class ipTable extends React.Component {
 
   render () {
     // Sort data
-    // SWITCH THIS UP TO SORT NUMBERS AND IPS AND DATES
-    let sortedData = sortBy(cloneDeep(this.props.data), [this.state.sortBy])
+    // NOTE: Refactor later into shouldComponentUpdate
+    let dataTransform = (d) => +d
+    if (this.state.sortBy === 'AccessTime') {
+      dataTransform = (d) => +new Date(d)
+    } else if (this.state.sortBy === 'SourceIP' || this.state.sortBy === 'DestIP') {
+      dataTransform = (d) => ipToInt(d)
+    }
+    let sortedData = this.props.data.sort((a, b) => {
+      return this.state.sortOrder === 'asc'
+        ? dataTransform(a[this.state.sortBy]) - dataTransform(b[this.state.sortBy])
+        : dataTransform(b[this.state.sortBy]) - dataTransform(a[this.state.sortBy])
+    })
 
     // Get page of data
     let start = this.state.page * this.state.pageSize

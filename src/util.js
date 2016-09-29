@@ -42,4 +42,14 @@ const binByValue = (data, accessor, maxBins = 0) => {
   return bins
 }
 
-export { binByValue, binByNumeric }
+const ipToInt = (ip) => {
+  var parts = ip.split('.')
+  var res = 0
+  res += parseInt(parts[0], 10) << 24
+  res += parseInt(parts[1], 10) << 16
+  res += parseInt(parts[2], 10) << 8
+  res += parseInt(parts[3], 10)
+  return res
+}
+
+export { binByValue, binByNumeric, ipToInt }

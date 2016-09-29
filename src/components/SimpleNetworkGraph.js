@@ -33,42 +33,62 @@ class SimpleNetworkGraph extends React.Component {
       .attr('height', height + this.props.margin.top + this.props.margin.bottom)
     this.chart = svg.append('g')
       .attr('transform', 'translate(' + this.props.margin.left + ',' + this.props.margin.top + ')')
+    this.srcNodeContainer = this.chart.append('g')
+      .attr('class', 'source node')
+    this.dstNodeContainer = this.chart.append('g')
+      .attr('class', 'dest node')
+    this.linkContainer = this.chart.append('g')
+      .attr('class', 'dest node')
   }
 
   updateChart () {
     this.generateGraph()
 
-    // Generate source nodes
+    // Create source nodes
     let srcScale = d3.scalePoint()
       .domain(this.nodes.filter((d) => d.type === 'SourceIP').map((d) => d.key))
-      .range([this.chartHeight, 0])
+      .range([0, this.chartWidth])
 
-    let srcNodeContainer = this.chart.append('g')
-      .attr('class', 'source node')
+    let srcNodes = this.srcNodeContainer.selectAll('.node')
+      .data(srcScale.domain(), (d) => d)
 
-    srcNodeContainer.selectAll('.node')
-        .data(srcScale.domain())
-      .enter().append('circle')
-        .attr('class', 'node')
-        .attr('cx', 0)
-        .attr('cy', (d) => srcScale(d))
-        .attr('r', 4)
+    srcNodes.exit().remove()
 
-    // Generate dest nodes
+    srcNodes.enter().append('circle')
+      .attr('class', 'node')
+      .attr('cx', (d) => srcScale(d))
+      .attr('cy', 0)
+      .attr('r', 4)
+
+    // Create dest nodes
     let dstScale = d3.scalePoint()
       .domain(this.nodes.filter((d) => d.type === 'DestIP').map((d) => d.key))
-      .range([this.chartHeight, 0])
+      .range([0, this.chartWidth])
 
-    let dstNodeContainer = this.chart.append('g')
-      .attr('class', 'dest node')
+    let dstNodes = this.dstNodeContainer.selectAll('.node')
+      .data(dstScale.domain(), (d) => d)
 
-    dstNodeContainer.selectAll('.node')
-        .data(dstScale.domain())
-      .enter().append('circle')
-        .attr('class', 'node')
-        .attr('cx', this.chartWidth)
-        .attr('cy', (d) => dstScale(d))
-        .attr('r', 4)
+    dstNodes.exit().remove()
+
+    dstNodes.enter().append('circle')
+      .attr('class', 'node')
+      .attr('cx', (d) => dstScale(d))
+      .attr('cy', this.chartHeight)
+      .attr('r', 4)
+
+    // Create links
+    let links = this.linkContainer.selectAll('.links')
+      .data(this.links, (d) => d.sourc + ' ' + d.target)
+
+    links.exit().remove()
+
+    let line = d3.line()
+      .x((d) => srcScale(d.source))
+      .y((d) => dstScale(d.target))
+
+    links.enter().append('path')
+      .attr('class', 'link')
+      .attr('d', line)
   }
 
   generateGraph () {
