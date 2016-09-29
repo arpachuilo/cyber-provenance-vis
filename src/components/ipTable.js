@@ -59,7 +59,7 @@ export class ipTable extends React.Component {
     this.state = {
       page: 0,
       pageSize: 20,
-      sortBy: 'ReqSize',
+      sortBy: 'AccessTime',
       sortOrder: 'asc'
     }
 

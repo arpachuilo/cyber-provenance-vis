@@ -5,6 +5,7 @@ import { toggleFilter, updateFilter } from '../redux/actions'
 import EmployeeTable from '../components/employeeTable'
 import IpTable from '../components/ipTable'
 import Histogram from '../components/histogram'
+import BadgeNetwork from '../components/BadgeNetwork'
 // import SimpleNetworkGraph from '../components/SimpleNetworkGraph'
 
 class GridView extends React.Component {
@@ -49,6 +50,9 @@ class GridView extends React.Component {
         </div>
         <div>
           <EmployeeTable data={this.props.employeeDataFiltered} className='employeeTable' />
+        </div>
+        <div>
+          <BadgeNetwork data={this.props.employeeData} className='badgeNetwork' />
         </div>
         <div>
           {/* <SimpleNetworkGraph data={this.props.ipData} /> */}
