@@ -74,7 +74,6 @@ class SimpleNetworkGraph extends React.Component {
       .attr('r', 4)
 
     // Create links
-    console.log(this.links)
     let links = this.linkContainer.selectAll('.link')
       .data(this.links, (d) => d.source + '-' + d.target)
 

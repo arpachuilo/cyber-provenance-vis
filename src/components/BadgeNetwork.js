@@ -14,6 +14,7 @@ class BadgeNetwork extends React.Component {
     this.removeChart = this.removeChart.bind(this)
 
     this.processData = this.processData.bind(this)
+    this.selectedIPs = d3.map()
 
     const tooltipFunction = (d) => {
       let tip = ''
@@ -46,7 +47,6 @@ class BadgeNetwork extends React.Component {
   }
 
   createChart () {
-    console.log('create')
     let root = d3.select(this.refs.root)
 
     // Get real chart width/height
@@ -67,7 +67,6 @@ class BadgeNetwork extends React.Component {
   }
 
   updateChart (props, state) {
-    console.log('update')
     // Process map data
     let dataMap = this.processData(props)
 
@@ -82,26 +81,39 @@ class BadgeNetwork extends React.Component {
 
     let offices = this.officeContainer.selectAll('.office')
       .data(props.employeeData, (d) => {
-        return d.EmployeeID + '-' + props.selectedTime.format()
+        return d.EmployeeID + '-' +
+          props.selectedTime.format() + '-' +
+          this.selectedIPs.has(d.IP)
       })
 
     offices.exit().remove()
 
+    let self = this
     offices.enter()
-      .append('g').merge(offices)
+      .append('rect').merge(offices)
         .attr('class', 'office')
-        .attr('transform', (d, i) => {
-          let x = xScale(i % 12)
-          let y = props.height - yScale(Math.floor(i / 12)) - yScale.bandwidth()
-          return 'translate(' + x + ',' + y + ')'
+        .attr('width', xScale.bandwidth())
+        .attr('height', yScale.bandwidth())
+        .attr('x', (d, i) => xScale(i % 12))
+        .attr('y', (d, i) => props.height - yScale(Math.floor(i / 12)) - yScale.bandwidth())
+        .on('click', function (d, i) {
+          if (self.selectedIPs.has(d.IP)) {
+            self.selectedIPs.remove(d.IP)
+          } else {
+            self.selectedIPs.set(d.IP, true)
+          }
+          let fillOpacity = self.selectedIPs.has(d.IP) ? 1.0 : 0.75
+          d3.select(this)
+            .attr('fill-opacity', fillOpacity)
+          props.onClick(d, props)
         })
-        .on('click', (d, i) => { props.onClick(d) })
         .on('mouseenter', (d, i) => { this.tip.show(d3.event, d) })
         .on('mouseleave', (d, i) => { this.tip.hide(d3.event, d) })
-      .append('rect')
+        .attr('stroke', 'black')
+        .attr('fill-opacity', (d) => this.selectedIPs.has(d.IP) ? 1.0 : 0.75)
         .attr('fill', (d) => {
           let color = 'white'
-          if (typeof dataMap.get(d.EmployeeID) !== 'undefined') {
+          if (dataMap.has(d.EmployeeID)) {
             let type = dataMap.get(d.EmployeeID).Type
             if (type === 'prox-in-building' || type === 'prox-out-classified') {
               color = '#41ab5d'
@@ -111,21 +123,30 @@ class BadgeNetwork extends React.Component {
           }
           return color
         })
-        .attr('stroke', 'black')
-        .attr('width', xScale.bandwidth())
-        .attr('height', yScale.bandwidth())
 
-    this.officeTextContainer.selectAll('.officeText')
-        .data(props.employeeData)
-      .enter().append('text')
-        .on('click', (d, i) => { props.onClick(d) })
-        .on('mouseenter', (d, i) => { this.tip.show(d3.event, d) })
-        .on('mouseleave', (d, i) => { this.tip.hide(d3.event, d) })
-        .attr('x', (d, i) => xScale(i % 12) + 3)
-        .attr('y', (d, i) => props.height - yScale(Math.floor(i / 12)) - 3)
-        .text((d) => {
-          return d.Office + '-' + d.EmployeeID
-        })
+    let officeText = this.officeTextContainer.selectAll('.officeText')
+        .data(props.employeeData, (d, i) => d.Office + '-' + d.EmployeeID)
+    officeText.exit().remove()
+    officeText.enter().append('text')
+      .attr('class', 'officeText')
+      .on('click', function (d, i) {
+        if (self.selectedIPs.has(d.IP)) {
+          self.selectedIPs.remove(d.IP)
+        } else {
+          self.selectedIPs.set(d.IP, true)
+        }
+        let fillOpacity = self.selectedIPs.has(d.IP) ? 1.0 : 0.75
+        d3.select(this)
+          .attr('fill-opacity', fillOpacity)
+        props.onClick(d, props)
+      })
+      .on('mouseenter', (d, i) => { this.tip.show(d3.event, d) })
+      .on('mouseleave', (d, i) => { this.tip.hide(d3.event, d) })
+      .attr('x', (d, i) => xScale(i % 12) + 3)
+      .attr('y', (d, i) => props.height - yScale(Math.floor(i / 12)) - 3)
+      .text((d) => {
+        return d.Office + '-' + d.EmployeeID
+      })
   }
 
   removeChart () {
@@ -144,7 +165,6 @@ class BadgeNetwork extends React.Component {
   }
 
   shouldComponentUpdate (nextProps, nextState) {
-    console.log(nextProps.selectedTime.format(), this.props.selectedTime.format())
     if (nextProps.selectedTime.format() !== this.props.selectedTime.format()) {
       this.updateChart(nextProps, nextState)
     }

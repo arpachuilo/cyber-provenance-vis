@@ -83,7 +83,6 @@ class GridView extends React.Component {
   }
 
   onHistogramBrushEnd (range) {
-    console.log(range)
     let accessTimeFilter = {
       'AccessTime': range
     }
@@ -92,6 +91,8 @@ class GridView extends React.Component {
   }
 
   render () {
+    let selectedTimeDisplay = makeDateString(this.state.day, this.state.hour, this.state.minute)
+    selectedTimeDisplay = moment(selectedTimeDisplay).format('dddd') + ' ' + selectedTimeDisplay
     return (
       <div>
         <div className='row'>
@@ -110,7 +111,7 @@ class GridView extends React.Component {
         <div className='row'>
           <div className='six columns'>
             <div>
-              <span>{makeDateString(this.state.day, this.state.hour, this.state.minute)}</span>
+              <span>{selectedTimeDisplay}</span>
             </div>
             <div className='badgeNetworkInput'>
               <span>{'Day: '}</span>
