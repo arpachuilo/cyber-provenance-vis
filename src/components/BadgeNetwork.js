@@ -1,5 +1,8 @@
 import React, { PropTypes } from 'react'
 import * as d3 from 'd3' // TODO: Reduce what's needed here
+import moment from 'moment'
+
+import Tooltip from './Tooltip'
 
 // NOTE: This is visualization was created specifically for the vast 2009 dataset
 class BadgeNetwork extends React.Component {
@@ -9,81 +12,142 @@ class BadgeNetwork extends React.Component {
     this.createChart = this.createChart.bind(this)
     this.updateChart = this.updateChart.bind(this)
     this.removeChart = this.removeChart.bind(this)
+
+    this.processData = this.processData.bind(this)
+
+    const tooltipFunction = (d) => {
+      let tip = ''
+      tip += '<span>Office: ' + d.Office + '</span></br>'
+      tip += '<span>Employee ID: ' + d.EmployeeID + '</span></br>'
+      tip += '<span>IP Address: ' + d.IP + '</span>'
+      return tip
+    }
+
+    this.tip = new Tooltip()
+      .attr('className', 'tooltip')
+      .html(tooltipFunction)
+  }
+
+  processData (props) {
+    let dataMap = d3.map()
+
+    // NOTE: Assumes prox data is sorted by descending Datetime
+    for (let i = 0; i < props.proxData.length; i++) {
+      let datum = props.proxData[i]
+      if (datum.Datetime < props.selectedTime && !dataMap.has(datum.ID)) {
+        dataMap.set(datum.ID, datum)
+      }
+      if (dataMap.size() === 60) {
+        break
+      }
+    }
+
+    return dataMap
   }
 
   createChart () {
+    console.log('create')
     let root = d3.select(this.refs.root)
 
     // Get real chart width/height
-    let width = this.props.width
-    let height = this.props.height
+    this.width = this.props.width
+    this.height = this.props.height
     if (this.props.autoWidth) {
-      width = root.node().offsetWidth
+      this.width = root.node().offsetWidth
     }
 
     let svg = root.append('svg')
-      .attr('width', width)
-      .attr('height', height)
+      .attr('width', this.width)
+      .attr('height', this.height)
     this.chart = svg.append('g')
     this.officeContainer = this.chart.append('g')
       .attr('class', 'offices')
-    this.classifiedContainer = this.chart.append('g')
-      .attr('class', 'offices')
+    this.officeTextContainer = this.chart.append('g')
+      .attr('class', 'officesText')
   }
 
-  updateChart () {
+  updateChart (props, state) {
+    console.log('update')
+    // Process map data
+    let dataMap = this.processData(props)
+
     // NOTE: Scale domains require a 'wrapped' index
     let xScale = d3.scaleBand()
       .domain(d3.range(0, 12))
-      .range([0, this.props.width])
+      .range([0, this.width])
 
     let yScale = d3.scaleBand()
       .domain(d3.range(0, 5))
-      .range([this.props.height, 0])
+      .range([this.height, 0])
 
-    let offices = this.officeContainer.selectAll('office')
-      .data(this.props.data)
+    let offices = this.officeContainer.selectAll('.office')
+      .data(props.employeeData, (d) => {
+        return d.EmployeeID + '-' + props.selectedTime.format()
+      })
 
-    offices = offices.enter()
-      .append('g')
+    offices.exit().remove()
+
+    offices.enter()
+      .append('g').merge(offices)
         .attr('class', 'office')
         .attr('transform', (d, i) => {
           let x = xScale(i % 12)
-          let y = this.props.height - yScale(Math.floor(i / 12)) - yScale.bandwidth()
+          let y = props.height - yScale(Math.floor(i / 12)) - yScale.bandwidth()
           return 'translate(' + x + ',' + y + ')'
         })
-        .on('mouseover', (d, i) => {
-          console.log(d)
+        .on('click', (d, i) => { props.onClick(d) })
+        .on('mouseenter', (d, i) => { this.tip.show(d3.event, d) })
+        .on('mouseleave', (d, i) => { this.tip.hide(d3.event, d) })
+      .append('rect')
+        .attr('fill', (d) => {
+          let color = 'white'
+          if (typeof dataMap.get(d.EmployeeID) !== 'undefined') {
+            let type = dataMap.get(d.EmployeeID).Type
+            if (type === 'prox-in-building' || type === 'prox-out-classified') {
+              color = '#41ab5d'
+            } else if (type === 'prox-in-classified') {
+              color = '#4292c6'
+            }
+          }
+          return color
         })
-    offices.append('rect')
-      .attr('fill', 'white')
-      .attr('stroke', 'black')
-      .attr('width', xScale.bandwidth())
-      .attr('height', yScale.bandwidth())
-    offices.append('text')
-      .attr('x', xScale.bandwidth() / 2 - 16)
-      .attr('y', yScale.bandwidth() / 2)
-      .text((d) => {
-        return d.Office + '-' + d.EmployeeID
-      })
+        .attr('stroke', 'black')
+        .attr('width', xScale.bandwidth())
+        .attr('height', yScale.bandwidth())
+
+    this.officeTextContainer.selectAll('.officeText')
+        .data(props.employeeData)
+      .enter().append('text')
+        .on('click', (d, i) => { props.onClick(d) })
+        .on('mouseenter', (d, i) => { this.tip.show(d3.event, d) })
+        .on('mouseleave', (d, i) => { this.tip.hide(d3.event, d) })
+        .attr('x', (d, i) => xScale(i % 12) + 3)
+        .attr('y', (d, i) => props.height - yScale(Math.floor(i / 12)) - 3)
+        .text((d) => {
+          return d.Office + '-' + d.EmployeeID
+        })
   }
 
   removeChart () {
     let root = d3.select(this.refs.root)
+    this.tip.destroy()
     root.selectAll('*').remove()
   }
 
   componentDidMount () {
     this.createChart()
-    this.updateChart()
+    this.updateChart(this.props, this.state)
   }
 
   componentWillUnmount () {
     this.removeChart()
   }
 
-  shouldComponentUpdate () {
-    this.updateChart()
+  shouldComponentUpdate (nextProps, nextState) {
+    console.log(nextProps.selectedTime.format(), this.props.selectedTime.format())
+    if (nextProps.selectedTime.format() !== this.props.selectedTime.format()) {
+      this.updateChart(nextProps, nextState)
+    }
     return false
   }
 
@@ -96,15 +160,20 @@ class BadgeNetwork extends React.Component {
 
 BadgeNetwork.defaultProps = {
   autoWidth: false,
-  width: 640,
-  height: 640
+  selectedTime: moment('2008-01-03T07:28'),
+  width: 720,
+  height: 320,
+  onClick: () => {}
 }
 
 BadgeNetwork.propTypes = {
-  data: PropTypes.array,
+  employeeData: PropTypes.array.isRequired,
+  proxData: PropTypes.array.isRequired,
+  selectedTime: PropTypes.any,
   autoWidth: PropTypes.bool,
   width: PropTypes.number,
-  height: PropTypes.number
+  height: PropTypes.number,
+  onClick: PropTypes.func
 }
 
 export default BadgeNetwork

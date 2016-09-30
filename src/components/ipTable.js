@@ -52,13 +52,33 @@ TextCell.propTypes = {
   columnKey: PropTypes.any
 }
 
+// For moment based dates
+class DateCell extends React.Component {
+  render () {
+    let { data, columnKey, ...props } = this.props
+    let text = data[columnKey] !== ''
+      ? data[columnKey]
+      : props.defaultText
+
+    return (
+      <Cell data={data} {...props}>
+        <span title={text}>{text.format()}</span>
+      </Cell>
+    )
+  }
+}
+DateCell.propTypes = {
+  data: PropTypes.any,
+  columnKey: PropTypes.any
+}
+
 export class ipTable extends React.Component {
   constructor (props) {
     super(props)
 
     this.state = {
       page: 0,
-      pageSize: 20,
+      pageSize: 12,
       sortBy: 'AccessTime',
       sortOrder: 'asc'
     }
@@ -100,13 +120,18 @@ export class ipTable extends React.Component {
     }
   }
 
+  shouldComponentUpdate (nextProps, nextState) {
+    return nextProps.data !== this.props.data ||
+      nextState.page !== this.state.page ||
+      nextState.pageSize !== this.state.pageSize ||
+      nextState.sortBy !== this.state.sortBy ||
+      nextState.sortOrder !== this.state.sortOrder
+  }
+
   render () {
     // Sort data
-    // NOTE: Refactor later into shouldComponentUpdate
     let dataTransform = (d) => +d
-    if (this.state.sortBy === 'AccessTime') {
-      dataTransform = (d) => +new Date(d)
-    } else if (this.state.sortBy === 'SourceIP' || this.state.sortBy === 'DestIP') {
+    if (this.state.sortBy === 'SourceIP' || this.state.sortBy === 'DestIP') {
       dataTransform = (d) => ipToInt(d)
     }
     let sortedData = this.props.data.sort((a, b) => {
@@ -131,7 +156,7 @@ export class ipTable extends React.Component {
                 sortOrder={this.state.sortOrder}>
                 Access Time
               </HeaderCell>}>
-            <TextCell />
+            <DateCell />
           </Column>
           <Column
             columnKey='SourceIP'

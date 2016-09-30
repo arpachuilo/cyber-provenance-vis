@@ -6,9 +6,6 @@ class SimpleNetworkGraph extends React.Component {
   constructor (props) {
     super(props)
 
-    this.nodes = []
-    this.links = []
-
     this.createChart = this.createChart.bind(this)
     this.updateChart = this.updateChart.bind(this)
     this.removeChart = this.removeChart.bind(this)
@@ -38,11 +35,11 @@ class SimpleNetworkGraph extends React.Component {
     this.dstNodeContainer = this.chart.append('g')
       .attr('class', 'dest node')
     this.linkContainer = this.chart.append('g')
-      .attr('class', 'dest node')
+      .attr('class', 'links')
   }
 
-  updateChart () {
-    this.generateGraph()
+  updateChart (props, state) {
+    this.generateGraph(props, state)
 
     // Create source nodes
     let srcScale = d3.scalePoint()
@@ -77,25 +74,28 @@ class SimpleNetworkGraph extends React.Component {
       .attr('r', 4)
 
     // Create links
-    let links = this.linkContainer.selectAll('.links')
-      .data(this.links, (d) => d.sourc + ' ' + d.target)
+    console.log(this.links)
+    let links = this.linkContainer.selectAll('.link')
+      .data(this.links, (d) => d.source + '-' + d.target)
 
     links.exit().remove()
 
-    let line = d3.line()
-      .x((d) => srcScale(d.source))
-      .y((d) => dstScale(d.target))
-
     links.enter().append('path')
       .attr('class', 'link')
-      .attr('d', line)
+      .attr('d', (d, i) => {
+        return 'M ' + srcScale(d.source) + ' 0 ' +
+          'L ' + dstScale(d.target) + ' ' + this.chartHeight
+      })
   }
 
-  generateGraph () {
+  generateGraph (props, state) {
+    this.nodes = []
+    this.links = []
+
     // Generate nodes
     let nodeFlags = {}
-    for (let i = 0; i < this.props.data.length; i++) {
-      let datum = this.props.data[i]
+    for (let i = 0; i < props.data.length; i++) {
+      let datum = props.data[i]
       // Get source
       let sourceFlagKey = datum.SourceIP.replace('.', '')
       if (!has(nodeFlags, sourceFlagKey)) {
@@ -119,8 +119,8 @@ class SimpleNetworkGraph extends React.Component {
 
     // Generate links
     let linkFlags = {}
-    for (let i = 0; i < this.props.data.length; i++) {
-      let datum = this.props.data[i]
+    for (let i = 0; i < props.data.length; i++) {
+      let datum = props.data[i]
 
       let linkFlagKey = datum.SourceIP.replace('.', '') +
         '-' + datum.DestIP.replace('.', '')
@@ -151,15 +151,17 @@ class SimpleNetworkGraph extends React.Component {
 
   componentDidMount () {
     this.createChart()
-    this.updateChart()
+    this.updateChart(this.props, this.state)
   }
 
   componentWillUnmount () {
     this.removeChart()
   }
 
-  shouldComponentUpdate () {
-    this.updateChart()
+  shouldComponentUpdate (nextProps, nextState) {
+    if (nextProps.data !== this.props.data) {
+      this.updateChart(nextProps, nextState)
+    }
     return false
   }
 
@@ -180,7 +182,7 @@ SimpleNetworkGraph.defaultProps = {
   },
   autoWidth: false,
   width: 640,
-  height: 640,
+  height: 380,
   keyAccessor: 'key',
   valueAccessor: 'ReqSize'
 }

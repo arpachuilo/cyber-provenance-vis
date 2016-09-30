@@ -1,9 +1,20 @@
+import moment from 'moment'
+
 import { toggleFilter, removeFilter, addFilter, updateFilter, clearFilters } from './vast'
 import { TOGGLE_FILTER, REMOVE_FILTER, ADD_FILTER, UPDATE_FILTER, CLEAR_FILTERS } from '../actions'
 
 import ipData from '../../data/IPLog3.5.csv'
 import proxData from '../../data/proxLog.csv'
 import employeeData from '../../data/employeeData.csv'
+
+// GO ahead and convert strings into useful objects
+for (let i = 0; i < ipData.length; i++) {
+  ipData[i].AccessTime = moment(ipData[i].AccessTime)
+}
+
+for (let i = 0; i < proxData.length; i++) {
+  proxData[i].Datetime = moment(proxData[i].Datetime)
+}
 
 const initialState = {
   ipData: ipData,

@@ -39,6 +39,18 @@ class Histogram extends React.Component {
       .attr('transform', 'translate(0,' + this.chartHeight + ')')
     this.yAxis = this.chart.append('g')
       .attr('class', 'axis y-axis')
+    this.chart.append('text')
+      .attr('class', 'axis label')
+      .attr('transform', 'rotate(-90)')
+      .attr('text-anchor', 'end')
+      .attr('y', -this.props.margin.left + 6)
+      .attr('dy', '.35em')
+      .text(this.props.yLabel)
+    this.chart.append('text')
+      .attr('x', this.chartWidth)
+      .attr('y', this.chartHeight + this.props.margin.bottom + 11)
+      .attr('text-anchor', 'end')
+      .text(this.props.xLabel)
     if (this.props.brushable) {
       this.brush = this.chart.append('g')
         .attr('class', 'brush')
@@ -47,14 +59,14 @@ class Histogram extends React.Component {
 
   updateChart (props, state) {
     this.xScale = d3.scaleTime()
-      .domain(d3.extent(props.data, (d) => +(new Date(d.AccessTime))))
+      .domain(d3.extent(props.data, (d) => +d.AccessTime))
       .range([0, this.chartWidth])
 
     this.yScale = d3.scaleLinear()
       .range([this.chartHeight, 0])
 
     let bins = d3.histogram()
-      .value((d) => +(new Date(d.AccessTime)))
+      .value((d) => +d.AccessTime)
       .domain(this.xScale.domain())
       .thresholds(this.xScale.ticks(100))(props.data)
 
@@ -79,7 +91,13 @@ class Histogram extends React.Component {
         .attr('width', (d) => this.xScale(d.x1) - this.xScale(d.x0))
         .attr('height', (d) => this.chartHeight - this.yScale(d.length))
 
-    this.xAxis.call(d3.axisBottom(this.xScale))
+    let xAxis = d3.axisBottom(this.xScale)
+    if (props.xAxisTickFunction) {
+      xAxis.tickFormat((d, i) => {
+        return props.xAxisTickFunction(d, i)
+      })
+    }
+    this.xAxis.call(xAxis)
     this.yAxis.call(d3.axisLeft(this.yScale))
 
     if (props.brushable) {
@@ -119,7 +137,9 @@ class Histogram extends React.Component {
   }
 
   shouldComponentUpdate (nextProps, nextState) {
-    this.updateChart(nextProps, nextState)
+    if (nextProps.data !== this.props.data) {
+      this.updateChart(nextProps, nextState)
+    }
     return false
   }
 
@@ -133,9 +153,9 @@ class Histogram extends React.Component {
 Histogram.defaultProps = {
   data: [],
   margin: {
-    top: 15,
-    left: 45,
-    bottom: 15,
+    top: 5,
+    left: 55,
+    bottom: 35,
     right: 45
   },
   numBins: 10,
@@ -146,6 +166,9 @@ Histogram.defaultProps = {
   onBrushStart: () => {},
   onBrushDrag: () => {},
   onBrushEnd: () => {},
+  xAxisTickFunction: null,
+  xLabel: '',
+  yLabel: '',
   xAccessor: 'key',
   yAccessor: 'value'
 }
@@ -161,6 +184,9 @@ Histogram.propTypes = {
   onBrushStart: PropTypes.func,
   onBrushDrag: PropTypes.func,
   onBrushEnd: PropTypes.func,
+  xAxisTickFunction: PropTypes.func,
+  xLabel: PropTypes.string,
+  yLabel: PropTypes.string,
   xAccessor: PropTypes.string,
   yAccessor: PropTypes.string
 }

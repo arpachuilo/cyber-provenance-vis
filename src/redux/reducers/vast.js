@@ -32,12 +32,6 @@ const applyFilters = (data, filterObject) => {
         if (filterObject[keyArr[j]].isRange) {
           let value = datum[keyArr[j]]
           let bounds = filterObject[keyArr[j]]
-          // Check if its a date
-          if (!Number.isNaN(Date.parse(value))) {
-            value = new Date(value)
-            bounds[0] = new Date(bounds[0])
-            bounds[1] = new Date(bounds[1])
-          }
           if (!(bounds[0] < value && value < bounds[1])) {
             keep = false
           }
