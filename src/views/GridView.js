@@ -41,6 +41,15 @@ class GridView extends React.Component {
     this.handleHourChange = this.handleHourChange.bind(this)
     this.handleMinuteChange = this.handleMinuteChange.bind(this)
     this.onInputMouseUp = this.onInputMouseUp.bind(this)
+    this.onKeyUp = this.onKeyUp.bind(this)
+  }
+
+  onKeyUp () {
+    let dateString = makeDateString(this.state.day, this.state.hour, this.state.minute)
+    let selectedTime = moment(dateString)
+    this.setState({
+      selectedTime
+    })
   }
 
   onInputMouseUp (event) {
@@ -99,14 +108,14 @@ class GridView extends React.Component {
           <Histogram data={this.props.ipDataFiltered}
             margin={{top: 8, left: 55, bottom: 8, right: 0}}
             yLabel='Event Count' autoWidth height={180}
-            xAxisTickFunction={this.detailXAxisTickFunc} />
+            xAxisTicks={12} xAxisTickFunction={this.detailXAxisTickFunc} />
         </div>
         <div className='row'>
           <Histogram data={this.props.ipData}
             margin={{top: 0, left: 55, bottom: 20, right: 0}}
             yLabel='Event Count' xLabel='Access Time'
             autoWidth height={90} brushable
-            onBrushEnd={this.onHistogramBrushEnd} />
+            xAxisTicks={31} onBrushEnd={this.onHistogramBrushEnd} />
         </div>
         <div className='row'>
           <div className='six columns'>
@@ -115,15 +124,15 @@ class GridView extends React.Component {
             </div>
             <div className='badgeNetworkInput'>
               <span>{'Day: '}</span>
-              <input type='range' onMouseUp={this.onInputMouseUp} onChange={this.handleDayChange} value={this.state.day} min='1' max='31' step='1' />
+              <input type='range' onMouseUp={this.onInputMouseUp} onKeyUp={this.onKeyUp} onChange={this.handleDayChange} value={this.state.day} min='1' max='31' step='1' />
             </div>
             <div className='badgeNetworkInput'>
               <span>{'Hour: '}</span>
-              <input type='range' onMouseUp={this.onInputMouseUp} onChange={this.handleHourChange} value={this.state.hour} min='0' max='23' step='1' /> <br />
+              <input type='range' onMouseUp={this.onInputMouseUp} onKeyUp={this.onKeyUp} onChange={this.handleHourChange} value={this.state.hour} min='0' max='23' step='1' /> <br />
             </div>
             <div className='badgeNetworkInput'>
               <span>{'Minute: '}</span>
-              <input type='range' onMouseUp={this.onInputMouseUp} onChange={this.handleMinuteChange} value={this.state.minute} min='0' max='59' step='1' /> <br />
+              <input type='range' onMouseUp={this.onInputMouseUp} onKeyUp={this.onKeyUp} onChange={this.handleMinuteChange} value={this.state.minute} min='0' max='59' step='1' /> <br />
             </div>
             <BadgeNetwork
               employeeData={this.props.employeeData}

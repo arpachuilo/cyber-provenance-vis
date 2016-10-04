@@ -182,7 +182,7 @@ BadgeNetwork.defaultProps = {
   autoWidth: false,
   selectedTime: moment('2008-01-03T07:28'),
   width: 720,
-  height: 320,
+  height: 160,
   onClick: () => {}
 }
 

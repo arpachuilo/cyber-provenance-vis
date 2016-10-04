@@ -2,6 +2,8 @@ import React, { PropTypes } from 'react'
 import has from 'lodash.has'
 import * as d3 from 'd3' // TODO: Reduce what's needed here
 
+import Tooltip from './Tooltip'
+
 class SimpleNetworkGraph extends React.Component {
   constructor (props) {
     super(props)
@@ -10,6 +12,15 @@ class SimpleNetworkGraph extends React.Component {
     this.updateChart = this.updateChart.bind(this)
     this.removeChart = this.removeChart.bind(this)
     this.generateGraph = this.generateGraph.bind(this)
+
+    const tooltipFunction = (d) => {
+      let tip = d
+      return tip
+    }
+
+    this.tip = new Tooltip()
+      .attr('className', 'tooltip')
+      .html(tooltipFunction)
   }
 
   createChart () {
@@ -32,6 +43,8 @@ class SimpleNetworkGraph extends React.Component {
       .attr('transform', 'translate(' + this.props.margin.left + ',' + this.props.margin.top + ')')
     this.srcNodeContainer = this.chart.append('g')
       .attr('class', 'source node')
+    this.srcLabelContainer = this.chart.append('g')
+      .attr('class', 'source label')
     this.dstNodeContainer = this.chart.append('g')
       .attr('class', 'dest node')
     this.linkContainer = this.chart.append('g')
@@ -47,15 +60,53 @@ class SimpleNetworkGraph extends React.Component {
       .range([0, this.chartWidth])
 
     let srcNodes = this.srcNodeContainer.selectAll('.node')
-      .data(srcScale.domain(), (d) => d)
+      .data(srcScale.domain(), (d, i) => d)
 
     srcNodes.exit().remove()
 
     srcNodes.enter().append('circle')
-      .attr('class', 'node')
-      .attr('cx', (d) => srcScale(d))
-      .attr('cy', 0)
-      .attr('r', 4)
+        .attr('class', 'node')
+        .on('mouseenter', (d, i) => {
+          this.tip.show(d3.event, d)
+          this.linkContainer.selectAll('.link')
+            .attr('display', (f, j) => {
+              return (f.source === d) ? 'block' : 'none'
+            })
+        })
+        .on('mouseleave', (d, i) => {
+          this.tip.hide(d3.event, d)
+          this.linkContainer.selectAll('.link')
+            .attr('display', 'block')
+        })
+      .merge(srcNodes)
+        .attr('cx', (d) => srcScale(d))
+        .attr('cy', 0)
+        .attr('r', 4)
+
+    // Create source node labels
+    let srcLabels = this.srcLabelContainer.selectAll('.label')
+      .data(srcScale.domain(), (d) => d)
+
+    srcLabels.exit().remove()
+
+    srcLabels.enter().append('text')
+        .attr('class', 'label')
+        .on('mouseenter', (d, i) => {
+          this.tip.show(d3.event, d)
+          this.linkContainer.selectAll('.link')
+            .attr('display', (f, j) => {
+              return (f.source === d) ? 'block' : 'none'
+            })
+        })
+        .on('mouseleave', (d, i) => {
+          this.tip.hide(d3.event, d)
+          this.linkContainer.selectAll('.link')
+            .attr('display', 'block')
+        })
+      .merge(srcLabels)
+        .attr('x', (d) => srcScale(d) - 3)
+        .attr('y', -(this.props.margin.top / 2) + 3)
+        .text((d) => d.split('.')[3])
 
     // Create dest nodes
     let dstScale = d3.scalePoint()
@@ -68,10 +119,23 @@ class SimpleNetworkGraph extends React.Component {
     dstNodes.exit().remove()
 
     dstNodes.enter().append('circle')
-      .attr('class', 'node')
-      .attr('cx', (d) => dstScale(d))
-      .attr('cy', this.chartHeight)
-      .attr('r', 4)
+        .attr('class', 'node')
+        .on('mouseenter', (d, i) => {
+          this.tip.show(d3.event, d)
+          this.linkContainer.selectAll('.link')
+            .attr('display', (f, j) => {
+              return (f.target === d) ? 'block' : 'none'
+            })
+        })
+        .on('mouseleave', (d, i) => {
+          this.tip.hide(d3.event, d)
+          this.linkContainer.selectAll('.link')
+            .attr('display', 'block')
+        })
+      .merge(dstNodes)
+        .attr('cx', (d) => dstScale(d))
+        .attr('cy', this.chartHeight)
+        .attr('r', 4)
 
     // Create links
     let links = this.linkContainer.selectAll('.link')
@@ -80,11 +144,12 @@ class SimpleNetworkGraph extends React.Component {
     links.exit().remove()
 
     links.enter().append('path')
-      .attr('class', 'link')
-      .attr('d', (d, i) => {
-        return 'M ' + srcScale(d.source) + ' 0 ' +
-          'L ' + dstScale(d.target) + ' ' + this.chartHeight
-      })
+        .attr('class', 'link')
+      .merge(links)
+        .attr('d', (d, i) => {
+          return 'M ' + srcScale(d.source) + ' 0 ' +
+            'L ' + dstScale(d.target) + ' ' + this.chartHeight
+        })
   }
 
   generateGraph (props, state) {
@@ -174,7 +239,7 @@ class SimpleNetworkGraph extends React.Component {
 SimpleNetworkGraph.defaultProps = {
   data: [],
   margin: {
-    top: 15,
+    top: 20,
     left: 15,
     bottom: 15,
     right: 15

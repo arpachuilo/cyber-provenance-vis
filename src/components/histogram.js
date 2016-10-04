@@ -92,6 +92,9 @@ class Histogram extends React.Component {
         .attr('height', (d) => this.chartHeight - this.yScale(d.length))
 
     let xAxis = d3.axisBottom(this.xScale)
+    if (props.xAxisTicks) {
+      xAxis.ticks(props.xAxisTicks)
+    }
     if (props.xAxisTickFunction) {
       xAxis.tickFormat((d, i) => {
         return props.xAxisTickFunction(d, i)
@@ -167,6 +170,7 @@ Histogram.defaultProps = {
   onBrushDrag: () => {},
   onBrushEnd: () => {},
   xAxisTickFunction: null,
+  xAxisTicks: null,
   xLabel: '',
   yLabel: '',
   xAccessor: 'key',
@@ -185,6 +189,7 @@ Histogram.propTypes = {
   onBrushDrag: PropTypes.func,
   onBrushEnd: PropTypes.func,
   xAxisTickFunction: PropTypes.func,
+  xAxisTicks: PropTypes.any,
   xLabel: PropTypes.string,
   yLabel: PropTypes.string,
   xAccessor: PropTypes.string,
