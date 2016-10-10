@@ -1,6 +1,8 @@
 import React, { PropTypes } from 'react'
 import * as d3 from 'd3' // TODO: Reduce what's needed here
 
+import Tooltip from './Tooltip'
+
 class Histogram extends React.Component {
   constructor (props) {
     super(props)
@@ -12,6 +14,18 @@ class Histogram extends React.Component {
     this.onBrushStart = this.onBrushStart.bind(this)
     this.onBrushDrag = this.onBrushDrag.bind(this)
     this.onBrushEnd = this.onBrushEnd.bind(this)
+
+    if (props.tooltip) {
+      const tooltipFunction = (d) => {
+        let tip = d
+        return tip
+      }
+
+      this.tip = new Tooltip()
+        .attr('className', 'tooltip')
+        .offset([-8, 0])
+        .html(tooltipFunction)
+    }
   }
 
   createChart () {
@@ -59,7 +73,7 @@ class Histogram extends React.Component {
 
   updateChart (props, state) {
     this.xScale = d3.scaleTime()
-      .domain(d3.extent(props.data, (d) => +d.AccessTime))
+      .domain(props.xDomain)
       .range([0, this.chartWidth])
 
     this.yScale = d3.scaleLinear()
@@ -81,6 +95,16 @@ class Histogram extends React.Component {
     bars.enter()
       .append('rect')
         .attr('class', 'bar')
+        .on('mouseenter', (d) => {
+          if (props.tooltip) {
+            this.tip.show(d3.event, d.length)
+          }
+        })
+        .on('mouseleave', (d) => {
+          if (props.tooltip) {
+            this.tip.hide(d3.event, d.length)
+          }
+        })
         .attr('x', (d) => this.xScale(d.x0))
         .attr('y', (d) => this.yScale(d.length))
         .attr('width', (d) => this.xScale(d.x1) - this.xScale(d.x0))
@@ -114,15 +138,15 @@ class Histogram extends React.Component {
   }
 
   onBrushStart () {
-    this.props.onBrushStart(d3.event.selection.map(this.xScale.invert))
+    this.props.onBrushStart(d3.event, d3.event.selection.map(this.xScale.invert))
   }
 
   onBrushDrag () {
-    this.props.onBrushDrag(d3.event.selection.map(this.xScale.invert))
+    this.props.onBrushDrag(d3.event, d3.event.selection.map(this.xScale.invert))
   }
 
   onBrushEnd () {
-    this.props.onBrushEnd(d3.event.selection.map(this.xScale.invert))
+    this.props.onBrushEnd(d3.event, d3.event.selection.map(this.xScale.invert))
   }
 
   removeChart () {
@@ -174,7 +198,8 @@ Histogram.defaultProps = {
   xLabel: '',
   yLabel: '',
   xAccessor: 'key',
-  yAccessor: 'value'
+  yAccessor: 'value',
+  tooltip: false
 }
 
 Histogram.propTypes = {
@@ -193,7 +218,8 @@ Histogram.propTypes = {
   xLabel: PropTypes.string,
   yLabel: PropTypes.string,
   xAccessor: PropTypes.string,
-  yAccessor: PropTypes.string
+  yAccessor: PropTypes.string,
+  tooltip: PropTypes.bool
 }
 
 export default Histogram

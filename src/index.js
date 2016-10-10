@@ -1,16 +1,28 @@
 import React from 'react'
 import ReactDom from 'react-dom'
 import { Provider } from 'react-redux'
+// import moment from 'moment'
 
 import createStore from './store'
-// import startStream from './stream'
+import redis from './redis'
 import routes from './routes'
 
 import './styles/main.styl'
 
 const store = window.store = createStore()
+window.redis = redis
 
-// startStream(store)
+const logMouse = (e) => {
+  // redis.add('mousemove', {
+  //   date: moment().format(),
+  //   eventType: 'mousemove',
+  //   target: e.target,
+  //   x: e.clientX,
+  //   y: e.clientY
+  // })
+}
+
+document.addEventListener('mousemove', logMouse, false)
 
 ReactDom.render(
   <Provider store={store}>

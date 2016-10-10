@@ -1,16 +1,16 @@
 import React from 'react'
-import GridView from '../views/GridView'
+import { Link } from 'react-router'
 
-class Home extends React.Component {
+class Background extends React.Component {
   render () {
     return (
       <div className='container'>
         <div className='row'>
-          <GridView />
+          <Link to='/end'>NEXT</Link>
         </div>
       </div>
     )
   }
 }
 
-export default Home
+export default Background

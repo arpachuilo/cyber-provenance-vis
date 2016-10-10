@@ -92,6 +92,7 @@ class BadgeNetwork extends React.Component {
     offices.enter()
       .append('rect').merge(offices)
         .attr('class', 'office')
+        .attr('id', (d) => 'office ' + d.Office + '-' + d.EmployeeID)
         .attr('width', xScale.bandwidth())
         .attr('height', yScale.bandwidth())
         .attr('x', (d, i) => xScale(i % 12))
@@ -105,7 +106,7 @@ class BadgeNetwork extends React.Component {
           let fillOpacity = self.selectedIPs.has(d.IP) ? 1.0 : 0.75
           d3.select(this)
             .attr('fill-opacity', fillOpacity)
-          props.onClick(d, props)
+          props.onClick(d3.event, d, props)
         })
         .on('mouseenter', (d, i) => { this.tip.show(d3.event, d) })
         .on('mouseleave', (d, i) => { this.tip.hide(d3.event, d) })
@@ -129,6 +130,7 @@ class BadgeNetwork extends React.Component {
     officeText.exit().remove()
     officeText.enter().append('text')
       .attr('class', 'officeText')
+      .attr('id', (d) => 'office ' + d.Office + '-' + d.EmployeeID)
       .on('click', function (d, i) {
         if (self.selectedIPs.has(d.IP)) {
           self.selectedIPs.remove(d.IP)
@@ -138,7 +140,7 @@ class BadgeNetwork extends React.Component {
         let fillOpacity = self.selectedIPs.has(d.IP) ? 1.0 : 0.75
         d3.select(this)
           .attr('fill-opacity', fillOpacity)
-        props.onClick(d, props)
+        props.onClick(d3.event, d, props)
       })
       .on('mouseenter', (d, i) => { this.tip.show(d3.event, d) })
       .on('mouseleave', (d, i) => { this.tip.hide(d3.event, d) })

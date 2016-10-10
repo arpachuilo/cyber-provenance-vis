@@ -20,6 +20,7 @@ class SimpleNetworkGraph extends React.Component {
 
     this.tip = new Tooltip()
       .attr('className', 'tooltip')
+      .offset([-8, 0])
       .html(tooltipFunction)
   }
 

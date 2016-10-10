@@ -3,11 +3,14 @@ import { connect } from 'react-redux'
 import * as d3 from 'd3'
 import moment from 'moment'
 
+import redis from '../redis'
+
 import { toggleFilter, updateFilter } from '../redux/actions'
 import IpTable from '../components/ipTable'
 import Histogram from '../components/histogram'
 import BadgeNetwork from '../components/BadgeNetwork'
 import SimpleNetworkGraph from '../components/SimpleNetworkGraph'
+import SocketInfo from '../components/socketInfo'
 
 // NOTE: Constructs a date string for VAST 2009 dataset
 const makeDateString = (day, hour, minute) => {
@@ -44,41 +47,61 @@ class GridView extends React.Component {
     this.onKeyUp = this.onKeyUp.bind(this)
   }
 
-  onKeyUp () {
+  onKeyUp (e) {
     let dateString = makeDateString(this.state.day, this.state.hour, this.state.minute)
     let selectedTime = moment(dateString)
+    redis.add('sliderMoved', {
+      date: moment().format(),
+      eventType: 'keyup',
+      target: e.target.id,
+      filters: this.props.filters,
+      bntTime: selectedTime
+    })
     this.setState({
       selectedTime
     })
   }
 
-  onInputMouseUp (event) {
+  onInputMouseUp (e) {
     let dateString = makeDateString(this.state.day, this.state.hour, this.state.minute)
     let selectedTime = moment(dateString)
+    redis.add('sliderMoved', {
+      date: moment().format(),
+      eventType: 'mouseup',
+      target: e.target.id,
+      filters: this.props.filters,
+      bntTime: selectedTime
+    })
     this.setState({
       selectedTime
     })
   }
 
-  handleDayChange (event) {
+  handleDayChange (e) {
     this.setState({
-      day: event.target.value
+      day: e.target.value
     })
   }
 
-  handleHourChange (event) {
+  handleHourChange (e) {
     this.setState({
-      hour: event.target.value
+      hour: e.target.value
     })
   }
 
-  handleMinuteChange (event) {
+  handleMinuteChange (e) {
     this.setState({
-      minute: event.target.value
+      minute: e.target.value
     })
   }
 
-  onOfficeClick (d, i) {
+  onOfficeClick (e, d, i) {
+    redis.add('officeClicked', {
+      date: moment().format(),
+      eventType: 'click',
+      target: e.target.id,
+      filters: this.props.filters
+    })
     this.props.toggleFilter({
       'SourceIP': [d.IP]
     })
@@ -91,10 +114,18 @@ class GridView extends React.Component {
     })
   }
 
-  onHistogramBrushEnd (range) {
+  onHistogramBrushEnd (e, range) {
+    redis.add('histogramBrushed', {
+      date: moment().format(),
+      eventType: 'brush',
+      target: 'histogram brush',
+      range: range,
+      filters: this.props.filters
+    })
     let accessTimeFilter = {
       'AccessTime': range
     }
+
     accessTimeFilter.AccessTime.isRange = true
     this.props.updateFilter(accessTimeFilter)
   }
@@ -102,10 +133,15 @@ class GridView extends React.Component {
   render () {
     let selectedTimeDisplay = makeDateString(this.state.day, this.state.hour, this.state.minute)
     selectedTimeDisplay = moment(selectedTimeDisplay).format('dddd') + ' ' + selectedTimeDisplay
+
+    let detailXDomain = typeof this.props.filters.AccessTime === 'undefined'
+      ? [1199202029276, 1201835254922]
+      : this.props.filters.AccessTime
     return (
       <div>
         <div className='row'>
           <Histogram data={this.props.ipDataFiltered}
+            xDomain={detailXDomain} tooltip
             margin={{top: 8, left: 55, bottom: 8, right: 0}}
             yLabel='Event Count' autoWidth height={180}
             xAxisTicks={12} xAxisTickFunction={this.detailXAxisTickFunc} />
@@ -115,6 +151,7 @@ class GridView extends React.Component {
             margin={{top: 0, left: 55, bottom: 20, right: 0}}
             yLabel='Event Count' xLabel='Access Time'
             autoWidth height={90} brushable
+            xDomain={[1199202029276, 1201835254922]}
             xAxisTicks={31} onBrushEnd={this.onHistogramBrushEnd} />
         </div>
         <div className='row'>
@@ -124,15 +161,15 @@ class GridView extends React.Component {
             </div>
             <div className='badgeNetworkInput'>
               <span>{'Day: '}</span>
-              <input type='range' onMouseUp={this.onInputMouseUp} onKeyUp={this.onKeyUp} onChange={this.handleDayChange} value={this.state.day} min='1' max='31' step='1' />
+              <input type='range' id='daySlider' onMouseUp={this.onInputMouseUp} onKeyUp={this.onKeyUp} onChange={this.handleDayChange} value={this.state.day} min='1' max='31' step='1' />
             </div>
             <div className='badgeNetworkInput'>
               <span>{'Hour: '}</span>
-              <input type='range' onMouseUp={this.onInputMouseUp} onKeyUp={this.onKeyUp} onChange={this.handleHourChange} value={this.state.hour} min='0' max='23' step='1' /> <br />
+              <input type='range' id='hourSlider' onMouseUp={this.onInputMouseUp} onKeyUp={this.onKeyUp} onChange={this.handleHourChange} value={this.state.hour} min='0' max='23' step='1' /> <br />
             </div>
             <div className='badgeNetworkInput'>
               <span>{'Minute: '}</span>
-              <input type='range' onMouseUp={this.onInputMouseUp} onKeyUp={this.onKeyUp} onChange={this.handleMinuteChange} value={this.state.minute} min='0' max='59' step='1' /> <br />
+              <input type='range' id='minuteSlider' onMouseUp={this.onInputMouseUp} onKeyUp={this.onKeyUp} onChange={this.handleMinuteChange} value={this.state.minute} min='0' max='59' step='1' /> <br />
             </div>
             <BadgeNetwork
               employeeData={this.props.employeeData}
@@ -141,6 +178,7 @@ class GridView extends React.Component {
               className='badgeNetwork'
               autoWidth
               onClick={this.onOfficeClick} />
+            <SocketInfo />
           </div>
           <div className='six columns'>
             <SimpleNetworkGraph data={this.props.ipDataFiltered} autoWidth />
@@ -148,7 +186,7 @@ class GridView extends React.Component {
         </div>
         <div className='row'>
           <IpTable
-            data={this.props.ipDataFiltered} className='twelve columns ipTable' />
+            data={this.props.ipDataFiltered} filters={this.props.filters} className='twelve columns ipTable' />
         </div>
       </div>
     )
@@ -174,7 +212,8 @@ GridView.propTypes = {
   employeeData: PropTypes.array,
   ipDataFiltered: PropTypes.array,
   proxDataFiltered: PropTypes.array,
-  employeeDataFiltered: PropTypes.array
+  employeeDataFiltered: PropTypes.array,
+  filters: PropTypes.any
 }
 
 const mapStateToProps = (state) => {
@@ -184,7 +223,8 @@ const mapStateToProps = (state) => {
     employeeData: state.vast.employeeData,
     ipDataFiltered: state.vast.ipDataFiltered,
     proxDataFiltered: state.vast.proxDataFiltered,
-    employeeDataFiltered: state.vast.employeeDataFiltered
+    employeeDataFiltered: state.vast.employeeDataFiltered,
+    filters: state.vast.filters
   }
 }
 

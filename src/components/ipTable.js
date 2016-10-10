@@ -1,4 +1,7 @@
 import React, { PropTypes } from 'react'
+import moment from 'moment'
+
+import redis from '../redis'
 
 import { Table, Column, Cell } from './table'
 import { ipToInt } from '../util'
@@ -20,7 +23,7 @@ class HeaderCell extends React.Component {
     }
     return (
       <Cell>
-        <a onClick={this.onClick}>{this.props.children + ' ' + symbol}</a>
+        <a id={this.props.children} onClick={this.onClick}>{this.props.children + ' ' + symbol}</a>
       </Cell>
     )
   }
@@ -92,10 +95,25 @@ export class ipTable extends React.Component {
   updateSort (sortKey) {
     // If currently selected, flip sortOrder
     if (sortKey === this.state.sortBy) {
+      redis.add('headerClicked', {
+        date: moment().format(),
+        eventType: 'click',
+        target: 'header ' + sortKey,
+        filters: this.props.filters,
+        sortKey: sortKey,
+        sortOrder: this.state.sortOrder === 'asc' ? 'desc' : 'asc'
+      })
       this.setState({
         sortOrder: this.state.sortOrder === 'asc' ? 'desc' : 'asc'
       })
     } else {
+      redis.add('headerClicked', {
+        date: moment().format(),
+        eventType: 'click',
+        target: 'header ' + sortKey,
+        sortKey: sortKey,
+        sortOrder: this.state.sortOrder === 'asc' ? 'desc' : 'asc'
+      })
       this.setState({
         sortBy: sortKey,
         sortOrder: 'asc'
@@ -104,6 +122,13 @@ export class ipTable extends React.Component {
   }
 
   prevPage () {
+    redis.add('pageChange', {
+      date: moment().format(),
+      eventType: 'click',
+      target: 'prev button',
+      filters: this.props.filters,
+      page: this.state.page - 1
+    })
     if (this.state.page > 0) {
       this.setState({
         page: this.state.page - 1
@@ -112,6 +137,13 @@ export class ipTable extends React.Component {
   }
 
   nextPage () {
+    redis.add('pageChange', {
+      date: moment().format(),
+      eventType: 'click',
+      target: 'next button',
+      filters: this.props.filters,
+      page: this.state.page + 1
+    })
     let maxPages = Math.floor(this.props.data.length / this.state.pageSize)
     if (this.state.page < maxPages) {
       this.setState({
@@ -122,6 +154,7 @@ export class ipTable extends React.Component {
 
   shouldComponentUpdate (nextProps, nextState) {
     return nextProps.data !== this.props.data ||
+      nextState.filters !== this.state.filters ||
       nextState.page !== this.state.page ||
       nextState.pageSize !== this.state.pageSize ||
       nextState.sortBy !== this.state.sortBy ||
@@ -231,12 +264,14 @@ export class ipTable extends React.Component {
 ipTable.defaultProps = {
   onRowClick: () => {},
   className: '',
+  filters: {},
   data: []
 }
 
 ipTable.propTypes = {
   onRowClick: PropTypes.func,
   className: PropTypes.string,
+  filters: PropTypes.any,
   data: PropTypes.array
 }
 
