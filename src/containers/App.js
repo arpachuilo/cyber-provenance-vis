@@ -11,8 +11,7 @@ class App extends React.Component {
               <ul>
                 <li><Link to='/irb' activeClassName='active'>IRB</Link></li>
                 <li><Link to='/background' activeClassName='active'>Background</Link></li>
-                <li><Link to='/visinfo' activeClassName='active'>Vis Info</Link></li>
-                <li><Link to='/taskinfo' activeClassName='active'>Task Info</Link></li>
+                <li><Link to='/info' activeClassName='active'>Info</Link></li>
                 <li><Link to='/vis' activeClassName='active'>Vis</Link></li>
                 <li><Link to='/questionnaire' activeClassName='active'>Questionnaire</Link></li>
                 <li><Link to='/end' activeClassName='active'>End</Link></li>

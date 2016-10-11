@@ -1,12 +1,12 @@
 import React from 'react'
 import { Link } from 'react-router'
 
-const histogram = require('../pictures/histogram.png')
-const bnt = require('../pictures/bnt.png')
-const graph = require('../pictures/graph.png')
-const table = require('../pictures/table.png')
+import histogram from '../pictures/histogram.png'
+import bnt from '../pictures/bnt.png'
+import graph from '../pictures/graph.png'
+import table from '../pictures/table.png'
 
-class VisInfo extends React.Component {
+class Info extends React.Component {
   render () {
     return (
       <div className='container'>
@@ -15,7 +15,7 @@ class VisInfo extends React.Component {
           <p>This is the event histogram. The bottom histogram shows the count for ip traffic events from the beginning to the end of the month. This histogram allows brushing which controls the more detailed histogram above to get a finer view of traffic flow for the brushed time period.</p>
           <img src={histogram} />
           <h5>Prox Card Viewer</h5>
-          <p>This is the prox card viewer, it shows employee prox card information. The time viewed is control via the sliders for the day, hour, minute. White indicates their is no log of them entering the office at the given time. Green indicates they are in their office or out of the classified area and blue indicates that they are currently in the classified area. The first number indicates the office of an employee and the second indicates the employees number.</p>
+          <p>This is the prox card viewer, it shows employee prox card information. The time viewed is control via the sliders for the day, hour, minute. White indicates their is no log of them entering the office at the given time. Green indicates they are in their office or out of the classified area and blue indicates that they are currently in the classified area. The first number indicates the office of an employee and the second indicates the employees number. Also remember that it is possible for employees to piggyback ie following behind someone without swiping their own prox card to gain access to part of the building.</p>
           <img src={bnt} />
           <p>Both the histogram and prox-card viewer control the data viewed in the graph and table</p>
           <h5>Network Graph</h5>
@@ -34,13 +34,15 @@ class VisInfo extends React.Component {
             <dt>8080</dt>
             <dd>Popular alternative to port 80 for offering web services. Above the restricted well known service port range (ports 1-1023)</dd>
           </dl>
+          <h5>Task</h5>
+          <p>You will be given 1 hour once you hit start to find as many suspicious events as possible.</p>
         </div>
         <div className='row'>
-          <Link to='/taskinfo'>NEXT</Link>
+          <h5><Link to='/vis'>START</Link></h5>
         </div>
       </div>
     )
   }
 }
 
-export default VisInfo
+export default Info

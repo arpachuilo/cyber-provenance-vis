@@ -1,6 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router'
 
+import redis from '../redis'
+
 class Background extends React.Component {
   constructor (props) {
     super(props)
@@ -12,6 +14,19 @@ class Background extends React.Component {
 
     this.handleGender = this.handleGender.bind(this)
     this.handleHighestDegree = this.handleHighestDegree.bind(this)
+
+    this.addDemographics = this.addDemographics.bind(this)
+  }
+
+  addDemographics (e) {
+    // Make sure there is no null demographic
+    for (let key in this.state) {
+      if (this.state[key] === null) {
+        e.preventDefault()
+      }
+    }
+
+    redis.demographics(this.state)
   }
 
   handleGender (e) {
@@ -44,7 +59,7 @@ class Background extends React.Component {
           <input type='radio' value='other' checked={this.state.highestDegree === 'other'} onChange={this.handleHighestDegree} /><span>Other</span><br />
         </div>
         <div className='row'>
-          <Link to='/visinfo'>NEXT</Link>
+          <h5><Link to='/info' onClick={this.addDemographics}>NEXT</Link></h5>
         </div>
       </div>
     )

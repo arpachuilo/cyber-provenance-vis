@@ -12,7 +12,6 @@ import BadgeNetwork from '../components/BadgeNetwork'
 import SimpleNetworkGraph from '../components/SimpleNetworkGraph'
 import SocketInfo from '../components/socketInfo'
 
-// NOTE: Constructs a date string for VAST 2009 dataset
 const makeDateString = (day, hour, minute) => {
   let paddedDay = (day + '').length === 1 ? '0' + day : day
   let paddedHour = (hour + '').length === 1 ? '0' + hour : hour

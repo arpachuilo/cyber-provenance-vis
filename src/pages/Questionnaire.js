@@ -6,7 +6,7 @@ class Background extends React.Component {
     return (
       <div className='container'>
         <div className='row'>
-          <Link to='/end'>NEXT</Link>
+          <h5><Link to='/end'>NEXT</Link></h5>
         </div>
       </div>
     )

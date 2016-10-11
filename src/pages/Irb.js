@@ -9,7 +9,7 @@ class Irb extends React.Component {
           <p>This is where IRB information will go . . .</p>
         </div>
         <div className='row'>
-          <Link to='/background'>NEXT</Link>
+          <h5><Link to='/background'>NEXT</Link></h5>
         </div>
       </div>
     )

@@ -5,8 +5,7 @@ import { ReduxRouter } from 'redux-router'
 import App from './containers/App'
 import Irb from './pages/Irb'
 import Background from './pages/Background'
-import VisInfo from './pages/VisInfo'
-import TaskInfo from './pages/TaskInfo'
+import Info from './pages/Info'
 import Vis from './pages/Vis'
 import Questionnaire from './pages/Questionnaire'
 import End from './pages/End'
@@ -18,8 +17,7 @@ const routes = (
         <IndexRedirect to='/irb' />
         <Route path='/irb' component={Irb} />
         <Route path='/background' component={Background} />
-        <Route path='/visinfo' component={VisInfo} />
-        <Route path='/taskinfo' component={TaskInfo} />
+        <Route path='/info' component={Info} />
         <Route path='/vis' component={Vis} />
         <Route path='/questionnaire' component={Questionnaire} />
         <Route path='/end' component={End} />
