@@ -1,19 +1,46 @@
-import React from 'react'
+import React, { PropTypes } from 'react'
 import { Link } from 'react-router'
 
 import redis from '../redis'
+
+class MultipleChoice extends React.Component {
+  render () {
+    return (
+      <div className='row'>
+        <h5>{this.props.title}</h5>
+        {this.props.choices.map((d, i) => {
+          return (
+            <div key={i}>
+              <input type='radio' value={d.value} checked={this.props.currentChoice === d.value} onChange={this.props.onChange} />
+              <span>{d.label}</span><br />
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+}
+
+MultipleChoice.propTypes = {
+  title: PropTypes.string,
+  currentChoice: PropTypes.string,
+  choices: PropTypes.array,
+  onChange: PropTypes.func
+}
 
 class Background extends React.Component {
   constructor (props) {
     super(props)
 
     this.state = {
+      age: '',
       gender: null,
       highestDegree: null
     }
 
     this.handleGender = this.handleGender.bind(this)
     this.handleHighestDegree = this.handleHighestDegree.bind(this)
+    this.handleAge = this.handleAge.bind(this)
 
     this.addDemographics = this.addDemographics.bind(this)
   }
@@ -27,6 +54,12 @@ class Background extends React.Component {
     }
 
     redis.demographics(this.state)
+  }
+
+  handleAge (e) {
+    this.setState({
+      age: e.currentTarget.value
+    })
   }
 
   handleGender (e) {
@@ -45,11 +78,12 @@ class Background extends React.Component {
     return (
       <div className='container'>
         <div className='row'>
-          <h5>Gender: </h5>
-          <input type='radio' value='female' checked={this.state.gender === 'female'} onChange={this.handleGender} /><span>Female</span><br />
-          <input type='radio' value='male' checked={this.state.gender === 'male'} onChange={this.handleGender} /><span>Male</span><br />
-          <input type='radio' value='other' checked={this.state.gender === 'other'} onChange={this.handleGender} /><span>Prefer not to say</span><br />
+          <input type='number' value={this.state.age} onChange={this.handleAge} />
         </div>
+        <MultipleChoice title='Gender: '
+          currentChoice={this.state.gender}
+          onChange={this.handleGender}
+          choices={[{value: 'female', label: 'Female'}, {value: 'male', label: 'Male'}, {value: 'other', label: 'Other/unsure'}]} />
         <div className='row'>
           <h5>Highest Degree Obtained: </h5>
           <input type='radio' value='highSchool' checked={this.state.highestDegree === 'highSchool'} onChange={this.handleHighestDegree} /><span>High School</span><br />

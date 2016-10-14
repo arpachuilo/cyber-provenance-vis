@@ -9,8 +9,8 @@ body
 
 // Nav style
 // Hide navbar
-// nav
-  // display none
+nav
+  display none
 
 nav ul
   list-style-type none
@@ -45,6 +45,9 @@ nav li a.active
 .ipTable table
   width 100%
 
+.ipTable th span
+  cursor pointer
+
 .ipTable .prevBtn
   float left
 
@@ -52,5 +55,17 @@ nav li a.active
   float right
 
 .ipTable .info
+  width 50%
+  margin 0 auto
   display inline-block
   text-align center
+
+dt
+  float left
+  clear left
+
+dl dt:nth-child(odd)
+  background-color whitesmoke
+
+dl dd:nth-child(odd)
+  background-color whitesmoke
