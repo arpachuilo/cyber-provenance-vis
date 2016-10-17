@@ -9,6 +9,7 @@ class App extends React.Component {
           <div className='row'>
             <nav>
               <ul>
+                <li><Link to='/start' activeClassName='active'>Start</Link></li>
                 <li><Link to='/irb' activeClassName='active'>IRB</Link></li>
                 <li><Link to='/background' activeClassName='active'>Background</Link></li>
                 <li><Link to='/info' activeClassName='active'>Info</Link></li>

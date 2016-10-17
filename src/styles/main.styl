@@ -39,13 +39,24 @@ nav li a.active
 
 // Override skeleton container size
 .container
-  max-width 80%
+  max-width 100%
+  width 98%
+
+.columns
+  margin-left 2%
 
 // IP table style
 .ipTable table
   width 100%
 
 .ipTable th span
+  cursor pointer
+
+.ipTable td
+  padding 1px 3px
+
+.ipTable td.AccessTime:hover
+  background-color #FFFBCC
   cursor pointer
 
 .ipTable .prevBtn

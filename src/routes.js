@@ -3,6 +3,7 @@ import { Route, Router, IndexRedirect, browserHistory } from 'react-router'
 import { ReduxRouter } from 'redux-router'
 
 import App from './containers/App'
+import Start from './pages/Start'
 import Irb from './pages/Irb'
 import Background from './pages/Background'
 import Info from './pages/Info'
@@ -14,7 +15,8 @@ const routes = (
   <ReduxRouter>
     <Router history={browserHistory}>
       <Route path='/' component={App}>
-        <IndexRedirect to='/irb' />
+        <IndexRedirect to='/start' />
+        <Route path='/start' component={Start} />
         <Route path='/irb' component={Irb} />
         <Route path='/background' component={Background} />
         <Route path='/info' component={Info} />

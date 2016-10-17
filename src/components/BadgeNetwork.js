@@ -1,7 +1,9 @@
 import React, { PropTypes } from 'react'
-import * as d3 from 'd3' // TODO: Reduce what's needed here
+import * as d3 from 'd3'
 import moment from 'moment'
+import cloneDeep from 'lodash.cloneDeep'
 
+import proxData from '../data/proxLog.csv'
 import Tooltip from './Tooltip'
 
 // NOTE: This is visualization was created specifically for the vast 2009 dataset
@@ -35,14 +37,13 @@ class BadgeNetwork extends React.Component {
     // NOTE: Assumes prox data is sorted by descending Datetime
     for (let i = 0; i < props.proxData.length; i++) {
       let datum = props.proxData[i]
-      if (datum.Datetime < props.selectedTime && !dataMap.has(datum.ID)) {
+      if (datum.Datetime.isBefore(props.selectedTime) && !dataMap.has(datum.ID)) {
         dataMap.set(datum.ID, datum)
       }
       if (dataMap.size() === 60) {
         break
       }
     }
-
     return dataMap
   }
 
@@ -108,12 +109,15 @@ class BadgeNetwork extends React.Component {
             .attr('fill-opacity', fillOpacity)
           props.onClick(d3.event, d, props)
         })
-        .on('mouseenter', (d, i) => { this.tip.show(d3.event, d) })
+        .on('mouseenter', (d, i) => {
+          this.props.onMouseEnter(d3.event, d, i)
+          this.tip.show(d3.event, d)
+        })
         .on('mouseleave', (d, i) => { this.tip.hide(d3.event, d) })
         .attr('stroke', 'black')
         .attr('fill-opacity', (d) => this.selectedIPs.has(d.IP) ? 1.0 : 0.75)
         .attr('fill', (d) => {
-          let color = 'white'
+          let color = '#636363'
           if (dataMap.has(d.EmployeeID)) {
             let type = dataMap.get(d.EmployeeID).Type
             if (type === 'prox-in-building' || type === 'prox-out-classified') {
@@ -137,19 +141,6 @@ class BadgeNetwork extends React.Component {
       .text((d) => {
         return d.Office + '-' + d.EmployeeID
       })
-      // .on('click', function (d, i) {
-      //   if (self.selectedIPs.has(d.IP)) {
-      //     self.selectedIPs.remove(d.IP)
-      //   } else {
-      //     self.selectedIPs.set(d.IP, true)
-      //   }
-      //   let fillOpacity = self.selectedIPs.has(d.IP) ? 1.0 : 0.75
-      //   d3.select(this)
-      //     .attr('fill-opacity', fillOpacity)
-      //   props.onClick(d3.event, d, props)
-      // })
-      // .on('mouseenter', (d, i) => { this.tip.show(d3.event, d) })
-      // .on('mouseleave', (d, i) => { this.tip.hide(d3.event, d) })
   }
 
   removeChart () {
@@ -168,7 +159,7 @@ class BadgeNetwork extends React.Component {
   }
 
   shouldComponentUpdate (nextProps, nextState) {
-    if (nextProps.selectedTime.format() !== this.props.selectedTime.format()) {
+    if (!nextProps.selectedTime.isSame(this.props.selectedTime)) {
       this.updateChart(nextProps, nextState)
     }
     return false
@@ -182,11 +173,13 @@ class BadgeNetwork extends React.Component {
 }
 
 BadgeNetwork.defaultProps = {
+  proxData: cloneDeep(proxData).reverse(),
   autoWidth: false,
   selectedTime: moment('2008-01-03T07:28'),
   width: 720,
   height: 160,
-  onClick: () => {}
+  onClick: () => {},
+  onMouseEnter: () => {}
 }
 
 BadgeNetwork.propTypes = {
@@ -196,7 +189,8 @@ BadgeNetwork.propTypes = {
   autoWidth: PropTypes.bool,
   width: PropTypes.number,
   height: PropTypes.number,
-  onClick: PropTypes.func
+  onClick: PropTypes.func,
+  onMouseEnter: PropTypes.func
 }
 
 export default BadgeNetwork

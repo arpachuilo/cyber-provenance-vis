@@ -4,7 +4,7 @@ class SocketInfo extends React.Component {
   render () {
     return (
       <div className={this.props.className}>
-        <span>Socket Info</span>
+        <span style={{fontWeight: 'bold'}}>Socket Info</span>
         <dl>
           <dt>25</dt>
           <dd>Used for Simple Mail Transfer Protocol (SMTP), an Internet standard for electronic mail (email) transmission. Mail applications typically use SMTP only for sending messages to a mail server for relaying emails</dd>

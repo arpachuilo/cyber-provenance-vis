@@ -68,6 +68,7 @@ class SimpleNetworkGraph extends React.Component {
     srcNodes.enter().append('circle')
         .attr('class', 'node')
         .on('mouseenter', (d, i) => {
+          this.props.onMouseEnter(d3.event, d)
           this.tip.show(d3.event, d)
           this.linkContainer.selectAll('.link')
             .attr('display', (f, j) => {
@@ -93,6 +94,7 @@ class SimpleNetworkGraph extends React.Component {
     srcLabels.enter().append('text')
         .attr('class', 'label')
         .on('mouseenter', (d, i) => {
+          this.props.onMouseEnter(d3.event, d)
           this.tip.show(d3.event, d)
           this.linkContainer.selectAll('.link')
             .attr('display', (f, j) => {
@@ -122,6 +124,7 @@ class SimpleNetworkGraph extends React.Component {
     dstNodes.enter().append('circle')
         .attr('class', 'node')
         .on('mouseenter', (d, i) => {
+          this.props.onMouseEnter(d3.event, d)
           this.tip.show(d3.event, d)
           this.linkContainer.selectAll('.link')
             .attr('display', (f, j) => {
@@ -249,7 +252,8 @@ SimpleNetworkGraph.defaultProps = {
   width: 640,
   height: 380,
   keyAccessor: 'key',
-  valueAccessor: 'ReqSize'
+  valueAccessor: 'ReqSize',
+  onMouseEnter: () => {}
 }
 
 SimpleNetworkGraph.propTypes = {
@@ -260,7 +264,8 @@ SimpleNetworkGraph.propTypes = {
   height: PropTypes.number,
   numBins: PropTypes.number,
   keyAccessor: PropTypes.string,
-  valueAccessor: PropTypes.string
+  valueAccessor: PropTypes.string,
+  onMouseEnter: PropTypes.func
 }
 
 export default SimpleNetworkGraph

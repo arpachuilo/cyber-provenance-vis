@@ -95,7 +95,13 @@ class Histogram extends React.Component {
     bars.enter()
       .append('rect')
         .attr('class', 'bar')
+        .on('click', (d) => {
+          if (!props.brushable) {
+            this.props.onClick(d3.event, d)
+          }
+        })
         .on('mouseenter', (d) => {
+          this.props.onMouseEnter(d3.event, d.length)
           if (props.tooltip) {
             this.tip.show(d3.event, d.length)
           }
@@ -190,6 +196,8 @@ Histogram.defaultProps = {
   autoWidth: false,
   width: 640,
   height: 360,
+  onClick: () => {},
+  onMouseEnter: () => {},
   onBrushStart: () => {},
   onBrushDrag: () => {},
   onBrushEnd: () => {},
@@ -210,6 +218,8 @@ Histogram.propTypes = {
   width: PropTypes.number,
   height: PropTypes.number,
   numBins: PropTypes.number,
+  onClick: PropTypes.func,
+  onMouseEnter: PropTypes.func,
   onBrushStart: PropTypes.func,
   onBrushDrag: PropTypes.func,
   onBrushEnd: PropTypes.func,

@@ -8,12 +8,18 @@ app.listen(8080)
 // Store id and data for session
 var id = ''
 var data = {
+  officeMouseEnter: [],
   officeClicked: [],
   sliderMoved: [],
-  histogramBrushed: [],
+  mouseEnter: [],
+  accessTimeClicked: [],
+  histogramBrushStart: [],
+  histogramBrushEnd: [],
   headerClicked: [],
   pageChange: [],
-  mousemove: [],
+  histogramBarClick: [],
+  histogramBarMouseEnter: [],
+  graphNodeMouseEnter: [],
   id: id
 }
 
@@ -27,12 +33,12 @@ io.on('connection', function (socket) {
     data.id = id
   })
 
-  socket.on('demographics', function(d) {
+  socket.on('demographics', function (d) {
     data.demographics = d
     save()
   })
 
-  socket.on('questionnaire', function(q) {
+  socket.on('questionnaire', function (q) {
     data.questionnaire = q
     save()
   })

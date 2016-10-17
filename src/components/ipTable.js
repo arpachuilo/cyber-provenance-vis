@@ -81,7 +81,7 @@ export class ipTable extends React.Component {
 
     this.state = {
       page: 0,
-      pageSize: 12,
+      pageSize: 16,
       sortBy: 'AccessTime',
       sortOrder: 'asc'
     }
@@ -183,6 +183,7 @@ export class ipTable extends React.Component {
           data={dataSubset}>
           <Column
             columnKey='AccessTime'
+            onColumnClick={this.props.onColumnClick}
             header={
               <HeaderCell onClick={this.updateSort}
                 sortBy={this.state.sortBy}
@@ -197,7 +198,7 @@ export class ipTable extends React.Component {
               <HeaderCell onClick={this.updateSort}
                 sortBy={this.state.sortBy}
                 sortOrder={this.state.sortOrder}>
-                Source IP
+                Src IP
               </HeaderCell>}>
             <TextCell />
           </Column>
@@ -207,7 +208,7 @@ export class ipTable extends React.Component {
               <HeaderCell onClick={this.updateSort}
                 sortBy={this.state.sortBy}
                 sortOrder={this.state.sortOrder}>
-                Destination IP
+                Dest IP
               </HeaderCell>}>
             <TextCell />
           </Column>
@@ -227,7 +228,7 @@ export class ipTable extends React.Component {
               <HeaderCell onClick={this.updateSort}
                 sortBy={this.state.sortBy}
                 sortOrder={this.state.sortOrder}>
-                Request Size
+                Req Size
               </HeaderCell>}>
             <TextCell />
           </Column>
@@ -237,7 +238,7 @@ export class ipTable extends React.Component {
               <HeaderCell onClick={this.updateSort}
                 sortBy={this.state.sortBy}
                 sortOrder={this.state.sortOrder}>
-                Response Size
+                Resp Size
               </HeaderCell>}>
             <TextCell />
           </Column>
@@ -262,6 +263,7 @@ export class ipTable extends React.Component {
 }
 
 ipTable.defaultProps = {
+  onColumnClick: () => {},
   onRowClick: () => {},
   className: '',
   filters: {},
@@ -269,6 +271,7 @@ ipTable.defaultProps = {
 }
 
 ipTable.propTypes = {
+  onColumnClick: PropTypes.func,
   onRowClick: PropTypes.func,
   className: PropTypes.string,
   filters: PropTypes.any,

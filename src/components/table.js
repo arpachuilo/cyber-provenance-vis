@@ -41,7 +41,7 @@ class Column extends React.Component {
 
   onClick (event) {
     event.stopPropagation() // Prevent row click handler from firing
-    this.props.onColumnClick(this.props.data, this.props.columnKey)
+    this.props.onColumnClick(event, this.props.data, this.props.columnKey)
   }
 
   render () {

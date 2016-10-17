@@ -12,7 +12,7 @@ import './styles/main.styl'
 const store = window.store = createStore()
 window.redis = redis
 
-const logMouse = (e) => {
+// const logMouse = (e) => {
   // redis.add('mousemove', {
   //   date: moment().format(),
   //   eventType: 'mousemove',
@@ -20,9 +20,9 @@ const logMouse = (e) => {
   //   x: e.clientX,
   //   y: e.clientY
   // })
-}
+// }
 
-document.addEventListener('mousemove', logMouse, false)
+// document.addEventListener('mousemove', logMouse, false)
 
 ReactDom.render(
   <Provider store={store}>
