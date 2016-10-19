@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react'
 import * as d3 from 'd3'
 import moment from 'moment'
-import cloneDeep from 'lodash.cloneDeep'
+import cloneDeep from 'lodash.clonedeep'
 
 import proxData from '../data/proxLog.csv'
 import Tooltip from './Tooltip'
@@ -104,7 +104,7 @@ class BadgeNetwork extends React.Component {
           } else {
             self.selectedIPs.set(d.IP, true)
           }
-          let fillOpacity = self.selectedIPs.has(d.IP) ? 1.0 : 0.75
+          let fillOpacity = self.selectedIPs.has(d.IP) ? 1.0 : 0.50
           d3.select(this)
             .attr('fill-opacity', fillOpacity)
           props.onClick(d3.event, d, props)
@@ -115,7 +115,7 @@ class BadgeNetwork extends React.Component {
         })
         .on('mouseleave', (d, i) => { this.tip.hide(d3.event, d) })
         .attr('stroke', 'black')
-        .attr('fill-opacity', (d) => this.selectedIPs.has(d.IP) ? 1.0 : 0.75)
+        .attr('fill-opacity', (d) => this.selectedIPs.has(d.IP) ? 1.0 : 0.50)
         .attr('fill', (d) => {
           let color = '#636363'
           if (dataMap.has(d.EmployeeID)) {

@@ -1,11 +1,13 @@
 import io from 'socket.io-client'
 
+import config from './config'
+
 class Redis {
   constructor () {
     this.socket = io.connect('http://localhost:8080')
     this.add = this.add.bind(this)
 
-    this.id = 'a'
+    this.id = config.id
 
     this.socket.emit('id', this.id)
   }

@@ -1,5 +1,5 @@
 const config = {
-  timeAllowed: 6
+  id: 'a'
 }
 
 export default config

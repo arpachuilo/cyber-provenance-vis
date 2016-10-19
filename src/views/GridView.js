@@ -11,7 +11,7 @@ import IpTable from '../components/ipTable'
 import Histogram from '../components/histogram'
 import BadgeNetwork from '../components/BadgeNetwork'
 import SimpleNetworkGraph from '../components/SimpleNetworkGraph'
-import SocketInfo from '../components/socketInfo'
+import MiscInfo from '../components/miscInfo'
 
 const makeDateString = (day, hour, minute) => {
   let paddedDay = (day + '').length === 1 ? '0' + day : day
@@ -282,7 +282,7 @@ class GridView extends React.Component {
               <Div id='badgeNetworkKeyLabelBlue' className='label'>prox-in-classified</Div>
             </Div>
             <Div id='socketInfo'>
-              <SocketInfo />
+              <MiscInfo />
             </Div>
           </div>
         </div>
