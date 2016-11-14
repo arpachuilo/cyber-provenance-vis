@@ -6,7 +6,7 @@ import moment from 'moment'
 import redis from '../redis'
 import Div from '../components/Div'
 
-import { toggleFilter, updateFilter } from '../redux/actions'
+import { toggleFilter, updateFilter, clearFilter } from '../redux/actions'
 import IpTable from '../components/ipTable'
 import Histogram from '../components/histogram'
 import BadgeNetwork from '../components/BadgeNetwork'
@@ -45,6 +45,7 @@ class GridView extends React.Component {
 
     this.onGraphNodeEnter = this.onGraphNodeEnter.bind(this)
 
+    this.onOfficeClear = this.onOfficeClear.bind(this)
     this.onOfficeClick = this.onOfficeClick.bind(this)
     this.officeEnter = this.officeEnter.bind(this)
 
@@ -101,6 +102,20 @@ class GridView extends React.Component {
     this.setState({
       minute: e.target.value
     })
+  }
+
+  onOfficeClear (e) {
+    this.refs.BNT.clearOffices()
+    redis.add('officesCleared', {
+      date: moment().format(),
+      eventType: 'click',
+      target: e.target.id,
+      x: e.pageX,
+      y: e.pageY,
+      filters: this.props.filters
+    })
+    this.props.clearFilter('SourceIP')
+    console.log(this.props.filters.SourceIP)
   }
 
   officeEnter (e) {
@@ -225,6 +240,12 @@ class GridView extends React.Component {
     let detailXDomain = typeof this.props.filters.AccessTime === 'undefined'
       ? [1199202029276, 1201835254922]
       : this.props.filters.AccessTime
+
+    let windowHeight = window.innerHeight
+    let detailHistogramHeight = (windowHeight / 2) * (3 / 5)
+    let overviewHistogramHeight = (windowHeight / 2) * (2 / 5)
+    let badgeNetworkHeight = ((windowHeight) / 2) * (2 / 5)
+    let networkGraphHeight = (windowHeight / 2) - 42
     return (
       <div id='mainPage'>
         <div className='row'>
@@ -233,7 +254,7 @@ class GridView extends React.Component {
               <Histogram data={this.props.ipDataFiltered}
                 xDomain={detailXDomain} tooltip
                 margin={{top: 8, left: 55, bottom: 8, right: 0}}
-                yLabel='Event Count' autoWidth height={300}
+                yLabel='Event Count' autoWidth height={detailHistogramHeight}
                 onMouseEnter={this.onHistogramMouseEnter} onClick={this.onHistogramClick}
                 xAxisTicks={12} xAxisTickFunction={this.detailXAxisTickFunc} />
             </Div>
@@ -241,11 +262,17 @@ class GridView extends React.Component {
               <Histogram data={this.props.ipData}
                 margin={{top: 0, left: 55, bottom: 20, right: 0}}
                 yLabel='Event Count' xLabel='Access Time'
-                autoWidth height={150} brushable
+                autoWidth height={overviewHistogramHeight} brushable
                 xDomain={[1199202029276, 1201835254922]}
                 xAxisTicks={29}
                 onBrushStart={this.onHistogramBrushStart}
                 onBrushEnd={this.onHistogramBrushEnd} />
+            </Div>
+            <Div id='networkGraph'>
+              <SimpleNetworkGraph
+                onMouseEnter={this.onGraphNodeEnter}
+                data={this.props.ipDataFiltered}
+                height={networkGraphHeight} autoWidth />
             </Div>
           </div>
           <div className='five columns'>
@@ -266,10 +293,12 @@ class GridView extends React.Component {
             </Div>
             <Div id='badgeNetwork'>
               <BadgeNetwork
+                ref='BNT'
                 employeeData={this.props.employeeData}
                 selectedTime={this.state.selectedTime}
+                filters={this.props.filters}
                 className='badgeNetwork'
-                autoWidth
+                autoWidth height={badgeNetworkHeight}
                 onMouseEnter={this.officeEnter}
                 onClick={this.onOfficeClick} />
             </Div>
@@ -280,22 +309,13 @@ class GridView extends React.Component {
               <Div id='badgeNetworkKeyLabelGreen' className='label'>prox-in-building OR prox-out-classified</Div>
               <Div id='badgeNetworkKeySquareBlue' className='square' style={{background: '#4292c6'}} />
               <Div id='badgeNetworkKeyLabelBlue' className='label'>prox-in-classified</Div>
+              <Div className='badgeNetworkClear'>
+                <a id='clearOffices' onClick={this.onOfficeClear} style={{float: 'right'}}>Clear</a>
+              </Div>
             </Div>
             <Div id='socketInfo'>
               <MiscInfo />
             </Div>
-          </div>
-        </div>
-        <div className='row'>
-          <div className='seven columns'>
-            <Div id='networkGraph'>
-              <SimpleNetworkGraph
-                onMouseEnter={this.onGraphNodeEnter}
-                data={this.props.ipDataFiltered}
-                height={480} autoWidth />
-            </Div>
-          </div>
-          <div className='five columns'>
             <Div id='ipTable' className='row'>
               <IpTable
                 onColumnClick={this.onColumnClick}
@@ -313,6 +333,7 @@ class GridView extends React.Component {
 GridView.defaultProps = {
   toggleFilter: () => {},
   updateFilter: () => {},
+  clearFilter: () => {},
   ipData: [],
   proxData: [],
   employeeData: [],
@@ -324,6 +345,7 @@ GridView.defaultProps = {
 GridView.propTypes = {
   toggleFilter: PropTypes.func,
   updateFilter: PropTypes.func,
+  clearFilter: PropTypes.func,
   ipData: PropTypes.array,
   proxData: PropTypes.array,
   employeeData: PropTypes.array,
@@ -347,7 +369,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
   toggleFilter,
-  updateFilter
+  updateFilter,
+  clearFilter
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(GridView)

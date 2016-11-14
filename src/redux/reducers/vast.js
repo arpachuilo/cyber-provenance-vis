@@ -133,6 +133,22 @@ const updateFilter = (state, filterObject) => {
   }
 }
 
+const clearFilter = (state, filterField) => {
+  let newFilterObject = {}
+  newFilterObject = state.filters
+  delete newFilterObject[filterField]
+
+  return {
+    ipData: state.ipData,
+    proxData: state.proxData,
+    employeeData: state.employeeData,
+    ipDataFiltered: applyFilters(state.ipData, newFilterObject),
+    proxDataFiltered: applyFilters(state.proxData, newFilterObject),
+    employeeDataFiltered: applyFilters(state.employeeData, newFilterObject),
+    filters: newFilterObject
+  }
+}
+
 const clearFilters = (state) => {
   return {
     ipData: state.ipData,
@@ -145,4 +161,4 @@ const clearFilters = (state) => {
   }
 }
 
-export { toggleFilter, addFilter, removeFilter, updateFilter, clearFilters }
+export { toggleFilter, addFilter, removeFilter, updateFilter, clearFilter, clearFilters }

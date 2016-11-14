@@ -81,7 +81,7 @@ export class ipTable extends React.Component {
 
     this.state = {
       page: 0,
-      pageSize: 16,
+      pageSize: 17,
       sortBy: 'AccessTime',
       sortOrder: 'asc'
     }

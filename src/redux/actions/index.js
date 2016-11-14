@@ -31,8 +31,16 @@ export const updateFilter = (filterObject) => {
 }
 
 export const CLEAR_FILTER = 'CLEAR_FILTER'
+export const clearFilter = (filterField) => {
+  return {
+    type: CLEAR_FILTER,
+    filterField: filterField
+  }
+}
+
+export const CLEAR_FILTERS = 'CLEAR_FILTERS'
 export const clearFilters = () => {
   return {
-    type: CLEAR_FILTER
+    type: CLEAR_FILTERS
   }
 }

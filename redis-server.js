@@ -8,6 +8,7 @@ app.listen(8080)
 // Store id and data for session
 var id = ''
 var data = {
+  officesCleared: [],
   officeMouseEnter: [],
   officeClicked: [],
   sliderMoved: [],
@@ -31,16 +32,6 @@ io.on('connection', function (socket) {
   socket.on('id', function (value) {
     id = value
     data.id = id
-  })
-
-  socket.on('demographics', function (d) {
-    data.demographics = d
-    save()
-  })
-
-  socket.on('questionnaire', function (q) {
-    data.questionnaire = q
-    save()
   })
 
   socket.on('add', function (key, value) {

@@ -15,6 +15,7 @@ class BadgeNetwork extends React.Component {
     this.updateChart = this.updateChart.bind(this)
     this.removeChart = this.removeChart.bind(this)
 
+    this.clearOffices = this.clearOffices.bind(this)
     this.processData = this.processData.bind(this)
     this.selectedIPs = d3.map()
 
@@ -29,6 +30,11 @@ class BadgeNetwork extends React.Component {
     this.tip = new Tooltip()
       .attr('className', 'tooltip')
       .html(tooltipFunction)
+  }
+
+  clearOffices () {
+    this.selectedIPs.clear()
+    console.log(this.selectedIPs)
   }
 
   processData (props) {
@@ -104,9 +110,9 @@ class BadgeNetwork extends React.Component {
           } else {
             self.selectedIPs.set(d.IP, true)
           }
-          let fillOpacity = self.selectedIPs.has(d.IP) ? 1.0 : 0.50
-          d3.select(this)
-            .attr('fill-opacity', fillOpacity)
+          // let fillOpacity = self.selectedIPs.has(d.IP) ? 1.0 : 0.50
+          // d3.select(this)
+          //   .attr('fill-opacity', fillOpacity)
           props.onClick(d3.event, d, props)
         })
         .on('mouseenter', (d, i) => {
@@ -159,6 +165,7 @@ class BadgeNetwork extends React.Component {
   }
 
   shouldComponentUpdate (nextProps, nextState) {
+    this.updateChart(nextProps, nextState)
     if (!nextProps.selectedTime.isSame(this.props.selectedTime)) {
       this.updateChart(nextProps, nextState)
     }

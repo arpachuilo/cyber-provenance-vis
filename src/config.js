@@ -1,5 +1,5 @@
 const config = {
-  id: 'a'
+  id: 'CPV-A'
 }
 
 export default config

@@ -12,14 +12,6 @@ class Redis {
     this.socket.emit('id', this.id)
   }
 
-  demographics (d) {
-    this.socket.emit('demographics', d)
-  }
-
-  questionnaire (q) {
-    this.socket.emit('questionnaire', q)
-  }
-
   add (k, v) {
     this.socket.emit('add', k, v)
   }

@@ -42,8 +42,8 @@ class Histogram extends React.Component {
     this.chartHeight = height - this.props.margin.top - this.props.margin.bottom
 
     let svg = root.append('svg')
-      .attr('width', width + this.props.margin.left + this.props.margin.right)
-      .attr('height', height + this.props.margin.top + this.props.margin.bottom)
+      .attr('width', this.chartWidth + this.props.margin.left + this.props.margin.right)
+      .attr('height', this.chartHeight + this.props.margin.top + this.props.margin.bottom)
     this.chart = svg.append('g')
       .attr('transform', 'translate(' + this.props.margin.left + ',' + this.props.margin.top + ')')
     this.barContainer = this.chart.append('g')

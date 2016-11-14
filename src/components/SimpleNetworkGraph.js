@@ -38,8 +38,8 @@ class SimpleNetworkGraph extends React.Component {
     this.chartHeight = height - this.props.margin.top - this.props.margin.bottom
 
     let svg = root.append('svg')
-      .attr('width', width + this.props.margin.left + this.props.margin.right)
-      .attr('height', height + this.props.margin.top + this.props.margin.bottom)
+      .attr('width', this.chartWidth + this.props.margin.left + this.props.margin.right)
+      .attr('height', this.chartHeight + this.props.margin.top + this.props.margin.bottom)
     this.chart = svg.append('g')
       .attr('transform', 'translate(' + this.props.margin.left + ',' + this.props.margin.top + ')')
     this.srcNodeContainer = this.chart.append('g')
@@ -245,7 +245,7 @@ SimpleNetworkGraph.defaultProps = {
   margin: {
     top: 20,
     left: 15,
-    bottom: 15,
+    bottom: 5,
     right: 15
   },
   autoWidth: false,
