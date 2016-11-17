@@ -5,16 +5,25 @@ class Row extends React.Component {
     super(props)
 
     this.onClick = this.onClick.bind(this)
+    this.onMouseOver = this.onMouseOver.bind(this)
   }
 
   onClick (event) {
-    this.props.onClick(this.props.data, this.props.index)
+    this.props.onClick(event, this.props.data, this.props.index)
+  }
+
+  onMouseOver (event) {
+    this.props.onMouseOver(event, this.props.data, this.props.index)
   }
 
   render () {
-    let { Component, data, children } = this.props
+    let { Component, selectedData, data, children } = this.props
+    let cls = ''
+    if (selectedData.includes(data)) {
+      cls += 'selected'
+    }
     return (
-      <Component onClick={this.onClick} data={data}>
+      <Component className={cls} onClick={this.onClick} onMouseOver={this.onMouseOver} data={data}>
         {children}
       </Component>
     )
@@ -22,11 +31,15 @@ class Row extends React.Component {
 }
 
 Row.defaultProps = {
-  onClick: () => {}
+  onClick: () => {},
+  onMouseOver: () => {},
+  selectedData: []
 }
 Row.propTypes = {
   onClick: PropTypes.func,
+  onMouseOver: PropTypes.func,
   data: PropTypes.any,
+  selectedData: PropTypes.any,
   index: PropTypes.number,
   Component: PropTypes.any,
   children: PropTypes.any
@@ -37,11 +50,17 @@ class Column extends React.Component {
     super(props)
 
     this.onClick = this.onClick.bind(this)
+    this.onMouseOver = this.onMouseOver.bind(this)
   }
 
   onClick (event) {
     event.stopPropagation() // Prevent row click handler from firing
     this.props.onColumnClick(event, this.props.data, this.props.columnKey)
+  }
+
+  onMouseOver (event) {
+    event.stopPropagation() // Prevent row click handler from firing
+    this.props.onColumnMouseOver(event, this.props.data, this.props.columnKey)
   }
 
   render () {
@@ -50,6 +69,10 @@ class Column extends React.Component {
     let conditionalProp = {}
     if (this.props.onColumnClick !== null) {
       conditionalProp.onClick = this.onClick
+    }
+
+    if (this.props.onColumnMouseOver !== null) {
+      conditionalProp.onMouseOver = this.onMouseOver
     }
 
     return (
@@ -65,11 +88,13 @@ class Column extends React.Component {
 }
 
 Column.defaultProps = {
-  onColumnClick: null
+  onColumnClick: null,
+  onColumnMouseOver: null
 }
 
 Column.propTypes = {
   onColumnClick: PropTypes.func,
+  onColumnMouseOver: PropTypes.func,
   Component: PropTypes.any,
   children: PropTypes.any,
   index: PropTypes.any,
@@ -100,7 +125,7 @@ Cell.propTypes = {
 
 class Table extends React.Component {
   render () {
-    let { RowComponent, onRowClick, children, data } = this.props
+    let { RowComponent, onRowClick, onRowMouseOver, children, selectedData, data } = this.props
     return (
       <table>
         <thead>
@@ -119,7 +144,7 @@ class Table extends React.Component {
         <tbody>
           {data.map((d, i) => {
             return (
-              <Row key={i} Component={RowComponent} onClick={onRowClick} data={d} index={i}>
+              <Row key={i} Component={RowComponent} onClick={onRowClick} onMouseOver={onRowMouseOver} selectedData={selectedData} data={d} index={i}>
                 {children.map((e, j) => {
                   return cloneElement(e, {
                     key: j,
@@ -139,14 +164,19 @@ class Table extends React.Component {
 
 Table.defaultProps = {
   data: [],
-  RowComponent: 'tr'
+  selectedData: [],
+  RowComponent: 'tr',
+  onRowClick: () => {},
+  onRowMouseOver: () => {}
 }
 
 Table.propTypes = {
   RowComponent: PropTypes.any,
   onRowClick: PropTypes.any,
+  onRowMouseOver: PropTypes.any,
   children: PropTypes.any,
-  data: PropTypes.array
+  data: PropTypes.array,
+  selectedData: PropTypes.array
 }
 
 export { Table, Row, Column, Cell }

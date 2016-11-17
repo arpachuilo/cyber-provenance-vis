@@ -180,7 +180,9 @@ export class ipTable extends React.Component {
       <div className={this.props.className}>
         <Table
           onRowClick={this.props.onRowClick}
-          data={dataSubset}>
+          onRowMouseOver={this.props.onRowMouseOver}
+          data={dataSubset}
+          selectedData={this.props.selectedData}>
           <Column
             columnKey='AccessTime'
             onColumnClick={this.props.onColumnClick}
@@ -265,17 +267,21 @@ export class ipTable extends React.Component {
 ipTable.defaultProps = {
   onColumnClick: () => {},
   onRowClick: () => {},
+  onRowMouseOver: () => {},
   className: '',
   filters: {},
-  data: []
+  data: [],
+  selectedData: []
 }
 
 ipTable.propTypes = {
   onColumnClick: PropTypes.func,
   onRowClick: PropTypes.func,
+  onRowMouseOver: PropTypes.func,
   className: PropTypes.string,
   filters: PropTypes.any,
-  data: PropTypes.array
+  data: PropTypes.array,
+  selectedData: PropTypes.array
 }
 
 export default ipTable

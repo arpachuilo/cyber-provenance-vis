@@ -28,7 +28,9 @@ class GridView extends React.Component {
       day: 1,
       hour: 0,
       minute: 0,
-      selectedTime: moment(makeDateString(1, 0, 0))
+      selectedTime: moment(makeDateString(1, 0, 0)),
+      selectedEvents: [],
+      showSelected: false
     }
 
     this.detailXAxisTickFunc = (d, i) => {
@@ -37,6 +39,9 @@ class GridView extends React.Component {
     }
 
     this.onColumnClick = this.onColumnClick.bind(this)
+    this.onRowClick = this.onRowClick.bind(this)
+    this.onRowMouseOver = this.onRowMouseOver.bind(this)
+    this.toggleSelected = this.toggleSelected.bind(this)
 
     this.onHistogramMouseEnter = this.onHistogramMouseEnter.bind(this)
     this.onHistogramClick = this.onHistogramClick.bind(this)
@@ -115,7 +120,6 @@ class GridView extends React.Component {
       filters: this.props.filters
     })
     this.props.clearFilter('SourceIP')
-    console.log(this.props.filters.SourceIP)
   }
 
   officeEnter (e) {
@@ -140,6 +144,57 @@ class GridView extends React.Component {
     })
     this.props.toggleFilter({
       'SourceIP': [d.IP]
+    })
+  }
+
+  toggleSelected (e) {
+    // Dumb and not returning as bool form . . .
+    let v = (e.target.value === 'true')
+    this.setState({
+      showSelected: !v
+    })
+    redis.add('tableToggleSelected', {
+      date: moment().format(),
+      eventType: 'click',
+      target: e.target.id,
+      setTo: !v,
+      x: e.pageX,
+      y: e.pageY,
+      filters: this.props.filters
+    })
+  }
+
+  onRowMouseOver (e, d, i) {
+    redis.add('rowMouseOver', {
+      date: moment().format(),
+      eventType: 'mouseover',
+      target: 'row: ' + i + ' data: ' + d.AccessTime,
+      x: e.pageX,
+      y: e.pageY,
+      filters: this.props.filters
+    })
+  }
+
+  onRowClick (e, d, i) {
+    if (e.shiftKey) {
+      let selectedEvents = this.state.selectedEvents
+      if (selectedEvents.includes(d)) {
+        selectedEvents.splice(selectedEvents.indexOf(d), 1)
+      } else {
+        selectedEvents.push(d)
+      }
+      this.setState({
+        selectedEvents
+      }, this.refs.ipTable.forceUpdate())
+    }
+
+    redis.add('rowClicked', {
+      date: moment().format(),
+      eventType: (e.shiftKey) ? 'shiftClick' : 'click',
+      target: 'row: ' + i + ' data: ' + d.AccessTime,
+      x: e.pageX,
+      y: e.pageY,
+      filters: this.props.filters
     })
   }
 
@@ -246,6 +301,9 @@ class GridView extends React.Component {
     let overviewHistogramHeight = (windowHeight / 2) * (2 / 5)
     let badgeNetworkHeight = ((windowHeight) / 2) * (2 / 5)
     let networkGraphHeight = (windowHeight / 2) - 42
+    let ipData = this.state.showSelected
+      ? this.state.selectedEvents
+      : this.props.ipDataFiltered
     return (
       <div id='mainPage'>
         <div className='row'>
@@ -316,10 +374,18 @@ class GridView extends React.Component {
             <Div id='socketInfo'>
               <MiscInfo />
             </Div>
+            <Div id='ipTableToggleSelected' className='row'>
+              <span>Show Selected Events: </span>
+              <input id='ipTableToggle' type='checkbox' onChange={this.toggleSelected} value={this.state.showSelected} />
+            </Div>
             <Div id='ipTable' className='row'>
               <IpTable
+                ref='ipTable'
+                onRowClick={this.onRowClick}
+                onRowMouseOver={this.onRowMouseOver}
                 onColumnClick={this.onColumnClick}
-                data={this.props.ipDataFiltered}
+                selectedData={this.state.selectedEvents}
+                data={ipData}
                 filters={this.props.filters}
                 className='twelve columns ipTable' />
             </Div>
