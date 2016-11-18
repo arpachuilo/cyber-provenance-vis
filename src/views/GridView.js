@@ -367,7 +367,7 @@ class GridView extends React.Component {
               <Div id='badgeNetworkKeyLabelGreen' className='label'>prox-in-building OR prox-out-classified</Div>
               <Div id='badgeNetworkKeySquareBlue' className='square' style={{background: '#4292c6'}} />
               <Div id='badgeNetworkKeyLabelBlue' className='label'>prox-in-classified</Div>
-              <Div className='badgeNetworkClear'>
+              <Div id='badgeNetworkClear' className='badgeNetworkClear'>
                 <a id='clearOffices' onClick={this.onOfficeClear} style={{float: 'right'}}>Clear</a>
               </Div>
             </Div>
