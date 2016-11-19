@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react'
 import * as d3 from 'd3' // TODO: Reduce what's needed here
+import moment from 'moment'
 
 import Tooltip from './Tooltip'
 
@@ -25,6 +26,21 @@ class Histogram extends React.Component {
         .attr('className', 'tooltip')
         .offset([-8, 0])
         .html(tooltipFunction)
+
+      if (props.brushable) {
+        const brushTooltipFunction = (d) => {
+          let x0 = d.target.getAttribute('x')
+          let x1 = d.target.getAttribute('width') + x0
+          x0 = this.xScale.invert(x0)
+          x1 = this.xScale.invert(x1)
+          return moment(x0).format() + ' to ' + moment(x1).format()
+        }
+
+        this.brushTip = new Tooltip()
+          .attr('className', 'tooltip')
+          .offset([-8, 0])
+          .html(brushTooltipFunction)
+      }
     }
   }
 
@@ -140,6 +156,9 @@ class Histogram extends React.Component {
           .on('start', this.onBrushStart)
           .on('brush', this.onBrushDrag)
           .on('end', this.onBrushEnd))
+        .select('.selection')
+          .on('mouseenter', (d) => this.brushTip.show(d3.event, d3.event))
+          .on('mouseleave', (d) => this.brushTip.hide(d3.event, d3.event))
     }
   }
 

@@ -81,7 +81,7 @@ export class ipTable extends React.Component {
 
     this.state = {
       page: 0,
-      pageSize: 17,
+      pageSize: 16,
       sortBy: 'AccessTime',
       sortOrder: 'asc'
     }
@@ -104,6 +104,7 @@ export class ipTable extends React.Component {
         sortOrder: this.state.sortOrder === 'asc' ? 'desc' : 'asc'
       })
       this.setState({
+        page: 0,
         sortOrder: this.state.sortOrder === 'asc' ? 'desc' : 'asc'
       })
     } else {
@@ -115,6 +116,7 @@ export class ipTable extends React.Component {
         sortOrder: this.state.sortOrder === 'asc' ? 'desc' : 'asc'
       })
       this.setState({
+        page: 0,
         sortBy: sortKey,
         sortOrder: 'asc'
       })
@@ -148,6 +150,14 @@ export class ipTable extends React.Component {
     if (this.state.page < maxPages) {
       this.setState({
         page: this.state.page + 1
+      })
+    }
+  }
+
+  componentWillReceiveProps (nextProps, nextState) {
+    if (this.props.showSelected !== nextProps.showSelected) {
+      this.setState({
+        page: 0
       })
     }
   }
@@ -271,7 +281,8 @@ ipTable.defaultProps = {
   className: '',
   filters: {},
   data: [],
-  selectedData: []
+  selectedData: [],
+  showSelected: false
 }
 
 ipTable.propTypes = {
@@ -281,7 +292,8 @@ ipTable.propTypes = {
   className: PropTypes.string,
   filters: PropTypes.any,
   data: PropTypes.array,
-  selectedData: PropTypes.array
+  selectedData: PropTypes.array,
+  showSelected: PropTypes.bool
 }
 
 export default ipTable

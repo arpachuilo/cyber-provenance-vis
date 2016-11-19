@@ -311,7 +311,7 @@ class GridView extends React.Component {
             <Div id='detailHistogram' className='row'>
               <Histogram data={this.props.ipDataFiltered}
                 xDomain={detailXDomain} tooltip
-                margin={{top: 8, left: 55, bottom: 8, right: 0}}
+                margin={{top: 8, left: 55, bottom: 20, right: 0}}
                 yLabel='Event Count' autoWidth height={detailHistogramHeight}
                 onMouseEnter={this.onHistogramMouseEnter} onClick={this.onHistogramClick}
                 xAxisTicks={12} xAxisTickFunction={this.detailXAxisTickFunc} />
@@ -322,7 +322,7 @@ class GridView extends React.Component {
                 yLabel='Event Count' xLabel='Access Time'
                 autoWidth height={overviewHistogramHeight} brushable
                 xDomain={[1199202029276, 1201835254922]}
-                xAxisTicks={29}
+                xAxisTicks={29} tooltip
                 onBrushStart={this.onHistogramBrushStart}
                 onBrushEnd={this.onHistogramBrushEnd} />
             </Div>
@@ -384,6 +384,7 @@ class GridView extends React.Component {
                 onRowClick={this.onRowClick}
                 onRowMouseOver={this.onRowMouseOver}
                 onColumnClick={this.onColumnClick}
+                showSelected={this.state.showSelected}
                 selectedData={this.state.selectedEvents}
                 data={ipData}
                 filters={this.props.filters}
