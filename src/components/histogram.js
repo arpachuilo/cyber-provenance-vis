@@ -29,11 +29,11 @@ class Histogram extends React.Component {
 
       if (props.brushable) {
         const brushTooltipFunction = (d) => {
-          let x0 = d.target.getAttribute('x')
-          let x1 = d.target.getAttribute('width') + x0
+          let x0 = (+d.target.getAttribute('x'))
+          let x1 = (+d.target.getAttribute('width')) + x0
           x0 = this.xScale.invert(x0)
           x1 = this.xScale.invert(x1)
-          return moment(x0).format() + ' to ' + moment(x1).format()
+          return (moment(x0).format()) + ' to ' + (moment(x1).format())
         }
 
         this.brushTip = new Tooltip()
