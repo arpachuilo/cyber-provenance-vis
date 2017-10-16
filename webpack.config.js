@@ -49,12 +49,16 @@ const common = {
     }),
     new webpack.NoErrorsPlugin()
   ],
+  node: {
+    fs: 'empty',
+    child_process: 'empty'
+  },
   module: {
-    preLoaders: [
-      {
-        test: /\.jsx?$/, loader: 'eslint', include: PATHS.app
-      }
-    ],
+    // preLoaders: [
+    //   {
+    //     test: /\.jsx?$/, loader: 'eslint', include: PATHS.app
+    //   }
+    // ],
     loaders: [
       {
         test: /\.styl$/, loader: 'style!css!stylus'

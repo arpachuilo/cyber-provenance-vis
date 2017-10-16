@@ -52,6 +52,7 @@
     "eslint-plugin-promise": "*",
     "eslint-plugin-react": "*",
     "eslint-plugin-standard": "*",
+    "eslint-plugin-node": "*",
     "exports-loader": "^0.6.3",
     "file-loader": "^0.9.0",
     "html-webpack-plugin": "^2.16.0",
